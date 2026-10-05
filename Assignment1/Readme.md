@@ -108,6 +108,7 @@ pyspark/transactions_etl.py is one script that runs both on your laptop (--local
 | Date normalization | `parse_ts()` | Attempts parsing using three source formats with `coalesce(to_timestamp(...))`; impossible dates such as `31/02` become `NULL` and are quarantined |
 
 
+
 # 4. Data Modelling
 
 A star schema with one fact table at the grain of one row per sales transaction, joined to three dimensions by surrogate keys. DDL is in sql/01_star_schema_ddl.sql, the load in sql/02_load_star_schema.sql; the test runner built it from the ETL output with 35,134 fact rows, 800 customers, 5 regions and zero orphan keys.
