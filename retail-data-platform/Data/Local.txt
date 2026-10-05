@@ -1,0 +1,294 @@
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ pip install -r requirements-dev.txt
+Requirement already satisfied: pyspark==3.5.3 in ./.venv/lib/python3.12/site-packages (from -r requirements-dev.txt (line 1)) (3.5.3)
+Requirement already satisfied: duckdb>=1.1 in ./.venv/lib/python3.12/site-packages (from -r requirements-dev.txt (line 2)) (1.5.6)
+Requirement already satisfied: pandas in ./.venv/lib/python3.12/site-packages (from -r requirements-dev.txt (line 3)) (3.0.6)
+Requirement already satisfied: pyarrow in ./.venv/lib/python3.12/site-packages (from -r requirements-dev.txt (line 4)) (25.0.1)
+Requirement already satisfied: boto3 in ./.venv/lib/python3.12/site-packages (from -r requirements-dev.txt (line 5)) (1.43.108)
+Requirement already satisfied: ruff in ./.venv/lib/python3.12/site-packages (from -r requirements-dev.txt (line 6)) (0.16.10)
+Requirement already satisfied: py4j==0.10.9.7 in ./.venv/lib/python3.12/site-packages (from pyspark==3.5.3->-r requirements-dev.txt (line 1)) (0.10.9.7)
+Requirement already satisfied: numpy>=1.26.0 in ./.venv/lib/python3.12/site-packages (from pandas->-r requirements-dev.txt (line 3)) (2.5.3)
+Requirement already satisfied: python-dateutil>=2.8.2 in ./.venv/lib/python3.12/site-packages (from pandas->-r requirements-dev.txt (line 3)) (2.9.0.post0)
+Requirement already satisfied: botocore<1.44.0,>=1.43.108 in ./.venv/lib/python3.12/site-packages (from boto3->-r requirements-dev.txt (line 5)) (1.43.108)
+Requirement already satisfied: jmespath<2.0.0,>=0.7.1 in ./.venv/lib/python3.12/site-packages (from boto3->-r requirements-dev.txt (line 5)) (1.1.0)
+Requirement already satisfied: s3transfer<0.20.0,>=0.19.0 in ./.venv/lib/python3.12/site-packages (from boto3->-r requirements-dev.txt (line 5)) (0.19.2)
+Requirement already satisfied: urllib3!=2.2.0,<3,>=1.25.4 in ./.venv/lib/python3.12/site-packages (from botocore<1.44.0,>=1.43.108->boto3->-r requirements-dev.txt (line 5)) (2.8.0)
+Requirement already satisfied: six>=1.5 in ./.venv/lib/python3.12/site-packages (from python-dateutil>=2.8.2->pandas->-r requirements-dev.txt (line 3)) (1.17.0)
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ python samples/generate_sample_data.py --days 120 --rows-per-day 300 --end-date 2026-10-05
+Wrote 37440 rows across 120 days to /home/harry/primarycolors/retail-data-platform/samples/data/raw/transactions
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ python pyspark/transactions_etl.py --local \
+  --source_path samples/data/raw/transactions \
+  --processed_path samples/data/processed/transactions \
+  --curated_path samples/data/curated \
+  --quarantine_path samples/data/quarantine/transactions \
+  --state_path samples/data/_state/transactions_etl
+26/10/05 14:39:13 WARN Utils: Your hostname, Bharathgift resolves to a loopback address: 127.0.1.1; using 10.255.255.254 instead (on interface lo)
+26/10/05 14:39:13 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+26/10/05 14:39:14 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-10-05 14:39:16,798 INFO [retail-etl] Starting run. run_date=None watermark=None
+2026-10-05 14:39:22,135 INFO [retail-etl] Read 37440 rows | passed DQ 36534 | quarantined 906 (2.42%)
+2026-10-05 14:39:22,661 INFO [retail-etl] Deduplication on transaction_id removed 1400 rows
+2026-10-05 14:39:26,212 INFO [retail-etl] Wrote processed/ partitions for 120 dates
+26/10/05 14:39:26 WARN GarbageCollectionMetrics: To enable non-built-in garbage collector(s) List(G1 Concurrent GC), users should configure it(them) to spark.eventLog.gcMetrics.youngGenerationGarbageCollectors or spark.eventLog.gcMetrics.oldGenerationGarbageCollectors
+{"job": "retail-transactions-etl-local", "rows_read": 37440, "rows_valid": 36534, "rows_quarantined": 906, "duplicates_removed": 1400, "duration_sec": 11.7, "event": "DQ_METRICS"}
+2026-10-05 14:39:30,194 INFO [retail-etl] Closing down clientserver connection
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ python tests/run_sql_tests.py
+dim_date                 1095 rows
+dim_region                  5 rows
+dim_customer              800 rows
+fact_transactions       35134 rows
+PK/FK integrity checks passed
+
+=== H1 Top 10 customers  (10 rows)
+┌─────────────┬───────────────┬───────────┬───────────────┬────────────┐
+│ customer_id │ customer_name │ txn_count │ total_amount  │ sales_rank │
+│   varchar   │    varchar    │   int64   │ decimal(38,2) │   int64    │
+├─────────────┼───────────────┼───────────┼───────────────┼────────────┤
+│ C00776      │ Customer 776  │        36 │     397893.88 │          1 │
+│ C00598      │ Customer 598  │        42 │     382856.30 │          2 │
+│ C00637      │ Customer 637  │        41 │     382279.17 │          3 │
+│ C00523      │ Customer 523  │        38 │     375286.82 │          4 │
+│ C00269      │ Customer 269  │        50 │     375242.51 │          5 │
+│ C00194      │ Customer 194  │        46 │     374058.11 │          6 │
+│ C00779      │ Customer 779  │        35 │     373474.28 │          7 │
+│ C00393      │ Customer 393  │        43 │     371316.33 │          8 │
+│ C00214      │ Customer 214  │        34 │     367959.24 │          9 │
+│ C00330      │ Customer 330  │        46 │     363104.05 │         10 │
+└─────────────┴───────────────┴───────────┴───────────────┴────────────┘
+  10 rows                                                    5 columns
+
+=== H2 Region sales, last 30 days  (5 rows)
+┌─────────────┬───────────┬───────────────┬──────────────┐
+│ region_name │ txn_count │  total_sales  │ pct_of_total │
+│   varchar   │   int64   │ decimal(38,2) │    double    │
+├─────────────┼───────────┼───────────────┼──────────────┤
+│ East        │      1158 │    8837142.20 │        20.74 │
+│ North       │      1138 │    8648580.57 │         20.3 │
+│ West        │      1108 │    8462870.65 │        19.87 │
+│ Central     │      1088 │    8376497.40 │        19.66 │
+│ South       │      1086 │    8275078.17 │        19.42 │
+└─────────────┴───────────┴───────────────┴──────────────┘
+
+=== H3 Month-over-month growth  (5 rows)
+┌─────────────┬──────────────┬───────────────┬──────────────────┬────────────────┐
+│ year_number │ month_number │ monthly_sales │ prev_month_sales │ mom_growth_pct │
+│    int16    │    int16     │ decimal(38,2) │  decimal(38,2)   │     double     │
+├─────────────┼──────────────┼───────────────┼──────────────────┼────────────────┤
+│        2026 │            6 │   30975573.08 │             NULL │           NULL │
+│        2026 │            7 │   41228434.36 │      30975573.08 │           33.1 │
+│        2026 │            8 │   41007088.04 │      41228434.36 │          -0.54 │
+│        2026 │            9 │   41241669.42 │      41007088.04 │           0.57 │
+│        2026 │           10 │    6624111.88 │      41241669.42 │         -83.94 │
+└─────────────┴──────────────┴───────────────┴──────────────────┴────────────────┘
+
+=== H4a Duplicate keys in raw  (1418 rows)
+┌───────────────────┬────────┬───────────────────┬─────────────────────┬─────────────────────┐
+│  transaction_id   │ copies │ distinct_statuses │   first_ingested    │    last_ingested    │
+│      varchar      │ int64  │       int64       │       varchar       │       varchar       │
+├───────────────────┼────────┼───────────────────┼─────────────────────┼─────────────────────┤
+│ TXN20260608000038 │      3 │                 2 │ 2026-06-09 00:30:41 │ 2026-06-09 03:30:41 │
+│ TXN20260614000253 │      3 │                 1 │ 2026-06-14 23:08:20 │ 2026-06-15 02:08:20 │
+│ TXN20260616000220 │      3 │                 2 │ 2026-06-16 15:39:10 │ 2026-06-16 18:39:10 │
+│ TXN20260621000064 │      3 │                 1 │ 2026-06-21 08:13:51 │ 2026-06-21 11:13:51 │
+│ TXN20260625000069 │      3 │                 2 │ 2026-06-25 04:15:19 │ 2026-06-25 07:15:19 │
+│ TXN20260707000178 │      3 │                 1 │ 2026-07-07 22:44:38 │ 2026-07-08 01:44:38 │
+│ TXN20260709000239 │      3 │                 1 │ 2026-07-09 12:46:10 │ 2026-07-09 15:46:10 │
+│ TXN20260727000152 │      3 │                 1 │ 2026-07-27 15:16:16 │ 2026-07-27 18:16:16 │
+│ TXN20260730000175 │      3 │                 2 │ 2026-07-30 00:52:12 │ 2026-07-30 03:52:12 │
+│ TXN20260730000243 │      3 │                 2 │ 2026-07-31 01:24:39 │ 2026-07-31 04:24:39 │
+└───────────────────┴────────┴───────────────────┴─────────────────────┴─────────────────────┘
+  10 rows                                                                          5 columns
+
+=== H4b Duplicate rows (rn=1 kept)  (2858 rows)
+┌───────────────────┬─────────────┬───────────────┬─────────────────────────┬───┬─────────────────────┬─────────────┬───────┬────────┐
+│  transaction_id   │ customer_id │ customer_name │     customer_email      │ … │      ingest_ts      │ ingest_date │  rn   │ copies │
+│      varchar      │   varchar   │    varchar    │         varchar         │ … │       varchar       │    date     │ int64 │ int64  │
+├───────────────────┼─────────────┼───────────────┼─────────────────────────┼───┼─────────────────────┼─────────────┼───────┼────────┤
+│ TXN20260608000011 │ C00163      │ Customer 163  │ customer163@example.com │ … │ 2026-06-08 20:26:24 │ 2026-06-08  │     1 │      2 │
+│ TXN20260608000011 │ C00163      │ Customer 163  │ customer163@example.com │ … │ 2026-06-08 20:26:24 │ 2026-06-08  │     2 │      2 │
+│ TXN20260608000018 │ C00515      │ Customer 515  │ customer515@example.com │ … │ 2026-06-08 04:02:14 │ 2026-06-08  │     1 │      2 │
+│ TXN20260608000018 │ C00515      │ Customer 515  │ customer515@example.com │ … │ 2026-06-08 04:02:14 │ 2026-06-08  │     2 │      2 │
+│ TXN20260608000038 │ C00761      │ Customer 761  │ customer761@example.com │ … │ 2026-06-09 03:30:41 │ 2026-06-08  │     1 │      3 │
+│ TXN20260608000038 │ C00761      │ Customer 761  │ customer761@example.com │ … │ 2026-06-09 00:30:41 │ 2026-06-08  │     2 │      3 │
+│ TXN20260608000038 │ C00761      │ Customer 761  │ customer761@example.com │ … │ 2026-06-09 00:30:41 │ 2026-06-08  │     3 │      3 │
+│ TXN20260608000054 │ C00107      │ Customer 107  │ customer107@example.com │ … │ 2026-06-08 09:30:00 │ 2026-06-08  │     1 │      2 │
+│ TXN20260608000054 │ C00107      │ Customer 107  │ customer107@example.com │ … │ 2026-06-08 06:30:00 │ 2026-06-08  │     2 │      2 │
+│ TXN20260608000084 │ C00317      │ Customer 317  │ customer317@example.com │ … │ 2026-06-08 08:47:50 │ 2026-06-08  │     1 │      2 │
+└───────────────────┴─────────────┴───────────────┴─────────────────────────┴───┴─────────────────────┴─────────────┴───────┴────────┘
+  10 rows                                                                                                       18 columns (8 shown)
+
+=== H5 No txn in 90 days  (15 rows)
+┌─────────────┬───────────────┬─────────────────────────┬───────────────────────┬─────────────────────┐
+│ customer_id │ customer_name │     customer_email      │ last_transaction_date │ days_since_last_txn │
+│   varchar   │    varchar    │         varchar         │         date          │        int64        │
+├─────────────┼───────────────┼─────────────────────────┼───────────────────────┼─────────────────────┤
+│ C00203      │ Customer 203  │ customer203@example.com │ 2026-06-25            │                  98 │
+│ C00427      │ Customer 427  │ customer427@example.com │ 2026-06-25            │                  98 │
+│ C00349      │ Customer 349  │ customer349@example.com │ 2026-06-28            │                  95 │
+│ C00482      │ Customer 482  │ customer482@example.com │ 2026-06-29            │                  94 │
+│ C00481      │ Customer 481  │ customer481@example.com │ 2026-06-29            │                  94 │
+│ C00566      │ Customer 566  │ customer566@example.com │ 2026-06-30            │                  93 │
+│ C00782      │ Customer 782  │ customer782@example.com │ 2026-06-30            │                  93 │
+│ C00240      │ Customer 240  │ customer240@example.com │ 2026-07-01            │                  92 │
+│ C00313      │ Customer 313  │ customer313@example.com │ 2026-07-02            │                  91 │
+│ C00491      │ Customer 491  │ customer491@example.com │ 2026-07-02            │                  91 │
+└─────────────┴───────────────┴─────────────────────────┴───────────────────────┴─────────────────────┘
+  10 rows                                                                                   5 columns
+
+All SQL assertions passed.
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ bash tests/test_streaming_late_and_dupes.sh
+after batch 1:
+[('T1',), ('T2',)]
+after batch 2 (restart from checkpoint):
+['T1', 'T2', 'T4']
+dlq: [('malformed_json',)]
+PASS: dedup across batches, watermark drop, DLQ, checkpoint restart
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ ^C
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ python samples/generate_sample_data.py --days 120 --rows-per-day 300 --end-date 2026-10-05
+Wrote 37440 rows across 120 days to /home/harry/primarycolors/retail-data-platform/samples/data/raw/transactions
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ python pyspark/transactions_etl.py --local   --source_path samples/data/raw/transactions   --processed_path samples/data/processed/transactions   --curated_path samples/data/curated   --quarantine_path samples/data/quarantine/transactions   --state_path samples/data/_state/transactions_etl
+26/10/05 14:55:39 WARN Utils: Your hostname, Bharathgift resolves to a loopback address: 127.0.1.1; using 10.255.255.254 instead (on interface lo)
+26/10/05 14:55:39 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+26/10/05 14:55:40 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-10-05 14:55:45,637 INFO [retail-etl] Starting run. run_date=None watermark=2026-10-05
+2026-10-05 14:55:47,686 INFO [retail-etl] No new data since watermark 2026-10-05 - nothing to do.
+2026-10-05 14:55:47,838 INFO [retail-etl] Closing down clientserver connection
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ python samples/generate_sample_data.py --days 120 --rows-per-day 300 --end-date 2026-10-16
+Wrote 37440 rows across 120 days to /home/harry/primarycolors/retail-data-platform/samples/data/raw/transactions
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ python pyspark/transactions_etl.py --local   --source_path samples/data/raw/transactions   --processed_path samples/data/processed/transactions   --curated_path samples/data/curated   --quarantine_path samples/data/quarantine/transactions   --state_path samples/data/_state/transactions_etl
+26/10/05 14:56:23 WARN Utils: Your hostname, Bharathgift resolves to a loopback address: 127.0.1.1; using 10.255.255.254 instead (on interface lo)
+26/10/05 14:56:23 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+26/10/05 14:56:23 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-10-05 14:56:28,538 INFO [retail-etl] Starting run. run_date=None watermark=2026-10-05
+2026-10-05 14:56:29,936 INFO [retail-etl] Read 3432 rows | passed DQ 3350 | quarantined 82 (2.39%)
+2026-10-05 14:56:32,224 INFO [retail-etl] Deduplication on transaction_id removed 125 rows
+2026-10-05 14:56:35,034 INFO [retail-etl] Wrote processed/ partitions for 11 dates
+26/10/05 14:56:36 WARN GarbageCollectionMetrics: To enable non-built-in garbage collector(s) List(G1 Concurrent GC), users should configure it(them) to spark.eventLog.gcMetrics.youngGenerationGarbageCollectors or spark.eventLog.gcMetrics.oldGenerationGarbageCollectors
+{"job": "retail-transactions-etl-local", "rows_read": 3432, "rows_valid": 3350, "rows_quarantined": 82, "duplicates_removed": 125, "duration_sec": 11.1, "event": "DQ_METRICS"}
+2026-10-05 14:56:39,396 INFO [retail-etl] Closing down clientserver connection
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ python tests/run_sql_tests.py
+dim_date                 1095 rows
+dim_region                  5 rows
+dim_customer              800 rows
+fact_transactions       38359 rows
+PK/FK integrity checks passed
+
+=== H1 Top 10 customers  (10 rows)
+┌─────────────┬───────────────┬───────────┬───────────────┬────────────┐
+│ customer_id │ customer_name │ txn_count │ total_amount  │ sales_rank │
+│   varchar   │    varchar    │   int64   │ decimal(38,2) │   int64    │
+├─────────────┼───────────────┼───────────┼───────────────┼────────────┤
+│ C00185      │ Customer 185  │        49 │     434571.03 │          1 │
+│ C00637      │ Customer 637  │        48 │     423009.75 │          2 │
+│ C00523      │ Customer 523  │        43 │     418482.63 │          3 │
+│ C00779      │ Customer 779  │        37 │     418334.58 │          4 │
+│ C00393      │ Customer 393  │        47 │     417596.32 │          5 │
+│ C00776      │ Customer 776  │        38 │     416677.81 │          6 │
+│ C00214      │ Customer 214  │        37 │     414532.23 │          7 │
+│ C00330      │ Customer 330  │        52 │     412688.95 │          8 │
+│ C00770      │ Customer 770  │        40 │     408091.76 │          9 │
+│ C00420      │ Customer 420  │        43 │     404576.10 │         10 │
+└─────────────┴───────────────┴───────────┴───────────────┴────────────┘
+  10 rows                                                    5 columns
+
+=== H2 Region sales, last 30 days  (5 rows)
+┌─────────────┬───────────┬───────────────┬──────────────┐
+│ region_name │ txn_count │  total_sales  │ pct_of_total │
+│   varchar   │   int64   │ decimal(38,2) │    double    │
+├─────────────┼───────────┼───────────────┼──────────────┤
+│ East        │      1158 │    8837142.20 │        20.74 │
+│ North       │      1138 │    8648580.57 │         20.3 │
+│ West        │      1108 │    8462870.65 │        19.87 │
+│ Central     │      1088 │    8376497.40 │        19.66 │
+│ South       │      1086 │    8275078.17 │        19.42 │
+└─────────────┴───────────┴───────────────┴──────────────┘
+
+=== H3 Month-over-month growth  (5 rows)
+┌─────────────┬──────────────┬───────────────┬──────────────────┬────────────────┐
+│ year_number │ month_number │ monthly_sales │ prev_month_sales │ mom_growth_pct │
+│    int16    │    int16     │ decimal(38,2) │  decimal(38,2)   │     double     │
+├─────────────┼──────────────┼───────────────┼──────────────────┼────────────────┤
+│        2026 │            6 │   30975573.08 │             NULL │           NULL │
+│        2026 │            7 │   41228434.36 │      30975573.08 │           33.1 │
+│        2026 │            8 │   41007088.04 │      41228434.36 │          -0.54 │
+│        2026 │            9 │   41241669.42 │      41007088.04 │           0.57 │
+│        2026 │           10 │   21550057.46 │      41241669.42 │         -47.75 │
+└─────────────┴──────────────┴───────────────┴──────────────────┴────────────────┘
+
+=== H4a Duplicate keys in raw  (1547 rows)
+┌───────────────────┬────────┬───────────────────┬─────────────────────┬─────────────────────┐
+│  transaction_id   │ copies │ distinct_statuses │   first_ingested    │    last_ingested    │
+│      varchar      │ int64  │       int64       │       varchar       │       varchar       │
+├───────────────────┼────────┼───────────────────┼─────────────────────┼─────────────────────┤
+│ TXN20260608000038 │      3 │                 2 │ 2026-06-09 00:30:41 │ 2026-06-09 03:30:41 │
+│ TXN20260614000253 │      3 │                 1 │ 2026-06-14 23:08:20 │ 2026-06-15 02:08:20 │
+│ TXN20260616000220 │      3 │                 2 │ 2026-06-16 15:39:10 │ 2026-06-16 18:39:10 │
+│ TXN20260619000038 │      3 │                 2 │ 2026-06-20 00:30:41 │ 2026-06-20 03:30:41 │
+│ TXN20260625000253 │      3 │                 1 │ 2026-06-25 23:08:20 │ 2026-06-26 02:08:20 │
+│ TXN20260627000220 │      3 │                 2 │ 2026-06-27 15:39:10 │ 2026-06-27 18:39:10 │
+│ TXN20260702000064 │      3 │                 1 │ 2026-07-02 08:13:51 │ 2026-07-02 11:13:51 │
+│ TXN20260706000069 │      3 │                 2 │ 2026-07-06 04:15:19 │ 2026-07-06 07:15:19 │
+│ TXN20260718000178 │      3 │                 1 │ 2026-07-18 22:44:38 │ 2026-07-19 01:44:38 │
+│ TXN20260720000239 │      3 │                 1 │ 2026-07-20 12:46:10 │ 2026-07-20 15:46:10 │
+└───────────────────┴────────┴───────────────────┴─────────────────────┴─────────────────────┘
+  10 rows                                                                          5 columns
+
+=== H4b Duplicate rows (rn=1 kept)  (3119 rows)
+┌───────────────────┬─────────────┬───────────────┬─────────────────────────┬───┬─────────────────────┬─────────────┬───────┬────────┐
+│  transaction_id   │ customer_id │ customer_name │     customer_email      │ … │      ingest_ts      │ ingest_date │  rn   │ copies │
+│      varchar      │   varchar   │    varchar    │         varchar         │ … │       varchar       │    date     │ int64 │ int64  │
+├───────────────────┼─────────────┼───────────────┼─────────────────────────┼───┼─────────────────────┼─────────────┼───────┼────────┤
+│ TXN20260608000011 │ C00163      │ Customer 163  │ customer163@example.com │ … │ 2026-06-08 20:26:24 │ 2026-06-08  │     1 │      2 │
+│ TXN20260608000011 │ C00163      │ Customer 163  │ customer163@example.com │ … │ 2026-06-08 20:26:24 │ 2026-06-08  │     2 │      2 │
+│ TXN20260608000018 │ C00515      │ Customer 515  │ customer515@example.com │ … │ 2026-06-08 04:02:14 │ 2026-06-08  │     1 │      2 │
+│ TXN20260608000018 │ C00515      │ Customer 515  │ customer515@example.com │ … │ 2026-06-08 04:02:14 │ 2026-06-08  │     2 │      2 │
+│ TXN20260608000038 │ C00761      │ Customer 761  │ customer761@example.com │ … │ 2026-06-09 03:30:41 │ 2026-06-08  │     1 │      3 │
+│ TXN20260608000038 │ C00761      │ Customer 761  │ customer761@example.com │ … │ 2026-06-09 00:30:41 │ 2026-06-08  │     2 │      3 │
+│ TXN20260608000038 │ C00761      │ Customer 761  │ customer761@example.com │ … │ 2026-06-09 00:30:41 │ 2026-06-08  │     3 │      3 │
+│ TXN20260608000054 │ C00107      │ Customer 107  │ customer107@example.com │ … │ 2026-06-08 09:30:00 │ 2026-06-08  │     1 │      2 │
+│ TXN20260608000054 │ C00107      │ Customer 107  │ customer107@example.com │ … │ 2026-06-08 06:30:00 │ 2026-06-08  │     2 │      2 │
+│ TXN20260608000084 │ C00317      │ Customer 317  │ customer317@example.com │ … │ 2026-06-08 08:47:50 │ 2026-06-08  │     1 │      2 │
+└───────────────────┴─────────────┴───────────────┴─────────────────────────┴───┴─────────────────────┴─────────────┴───────┴────────┘
+  10 rows                                                                                                       18 columns (8 shown)
+
+=== H5 No txn in 90 days  (15 rows)
+┌─────────────┬───────────────┬─────────────────────────┬───────────────────────┬─────────────────────┐
+│ customer_id │ customer_name │     customer_email      │ last_transaction_date │ days_since_last_txn │
+│   varchar   │    varchar    │         varchar         │         date          │        int64        │
+├─────────────┼───────────────┼─────────────────────────┼───────────────────────┼─────────────────────┤
+│ C00427      │ Customer 427  │ customer427@example.com │ 2026-06-25            │                  98 │
+│ C00203      │ Customer 203  │ customer203@example.com │ 2026-06-25            │                  98 │
+│ C00349      │ Customer 349  │ customer349@example.com │ 2026-06-28            │                  95 │
+│ C00482      │ Customer 482  │ customer482@example.com │ 2026-06-29            │                  94 │
+│ C00481      │ Customer 481  │ customer481@example.com │ 2026-06-29            │                  94 │
+│ C00566      │ Customer 566  │ customer566@example.com │ 2026-06-30            │                  93 │
+│ C00782      │ Customer 782  │ customer782@example.com │ 2026-06-30            │                  93 │
+│ C00240      │ Customer 240  │ customer240@example.com │ 2026-07-01            │                  92 │
+│ C00452      │ Customer 452  │ customer452@example.com │ 2026-07-02            │                  91 │
+│ C00611      │ Customer 611  │ customer611@example.com │ 2026-07-02            │                  91 │
+└─────────────┴───────────────┴─────────────────────────┴───────────────────────┴─────────────────────┘
+  10 rows                                                                                   5 columns
+
+All SQL assertions passed.
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ bash tests/test_streaming_late_and_dupes.sh
+after batch 1:
+[('T1',), ('T2',)]
+after batch 2 (restart from checkpoint):
+['T1', 'T2', 'T4']
+dlq: [('malformed_json',)]
+PASS: dedup across batches, watermark drop, DLQ, checkpoint restart
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$ python pyspark/transactions_etl.py --local   --source_path samples/data/raw/transactions   --processed_path samples/data/processed/transactions   --curated_path samples/data/curated   --quarantine_path samples/data/quarantine/transactions   --state_path samples/data/_state/transactions_etl
+26/10/05 15:01:55 WARN Utils: Your hostname, Bharathgift resolves to a loopback address: 127.0.1.1; using 10.255.255.254 instead (on interface lo)
+26/10/05 15:01:55 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+26/10/05 15:01:56 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-10-05 15:01:58,227 INFO [retail-etl] Starting run. run_date=None watermark=2026-10-16
+2026-10-05 15:02:00,092 INFO [retail-etl] No new data since watermark 2026-10-16 - nothing to do.
+2026-10-05 15:02:00,459 INFO [retail-etl] Closing down clientserver connection
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform$
