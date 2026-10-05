@@ -1,0 +1,2735 @@
+_
+╵
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live$ ls
+backend  envs  main.tf  main.tf:Zone.Identifier  outputs.tf  outputs.tf:Zone.Identifier  variables.tf  variables.tf:Zone.Identifier  versions.tf  versions.tf:Zone.Identifier
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live$ ls -alh
+total 52K
+drwxr-xr-x 5 harry harry 4.0K Oct  5 15:17 .
+drwxr-xr-x 4 harry harry 4.0K Oct  5 14:25 ..
+drwxr-xr-x 3 harry harry 4.0K Oct  5 15:17 .terraform
+drwxr-xr-x 2 harry harry 4.0K Oct  5 14:25 backend
+drwxr-xr-x 2 harry harry 4.0K Oct  5 14:25 envs
+-rw-r--r-- 1 harry harry 2.5K Oct  5 14:25 main.tf
+-rw-r--r-- 1 harry harry   25 Oct  5 14:25 main.tf:Zone.Identifier
+-rw-r--r-- 1 harry harry  349 Oct  5 14:25 outputs.tf
+-rw-r--r-- 1 harry harry   25 Oct  5 14:25 outputs.tf:Zone.Identifier
+-rw-r--r-- 1 harry harry 1.1K Oct  5 14:25 variables.tf
+-rw-r--r-- 1 harry harry   25 Oct  5 14:25 variables.tf:Zone.Identifier
+-rw-r--r-- 1 harry harry  644 Oct  5 14:25 versions.tf
+-rw-r--r-- 1 harry harry   25 Oct  5 14:25 versions.tf:Zone.Identifier
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live$ ls
+backend  envs  main.tf  main.tf:Zone.Identifier  outputs.tf  outputs.tf:Zone.Identifier  variables.tf  variables.tf:Zone.Identifier  versions.tf  versions.tf:Zone.Identifier
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live$ cd backend/
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live/backend$ ls
+dev.hcl  dev.hcl:Zone.Identifier  prod.hcl  prod.hcl:Zone.Identifier
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live/backend$ nano dev.hcl
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live/backend$ cd ..
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live$ terraform init -backend-config=backend/dev.hcl
+Initializing the backend...
+
+Successfully configured the backend "s3"! Terraform will automatically
+use this backend unless the backend configuration changes.
+
+Initializing modules...
+
+Initializing provider plugins...
+- Finding hashicorp/aws versions matching "~> 5.70"...
+- Installing hashicorp/aws v5.100.0...
+- Installed hashicorp/aws v5.100.0 (signed by HashiCorp)
+
+Terraform has created a lock file .terraform.lock.hcl to record the provider
+selections it made above. Include this file in your version control repository
+so that Terraform can guarantee to make the same selections by default when
+you run "terraform init" in the future.
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live$ terraform fmt -check -recursive .. && terraform validate
+Success! The configuration is valid.
+
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live$ terraform plan  -var-file=envs/dev.tfvars -out=dev.tfplan
+data.aws_caller_identity.current: Reading...
+module.glue_role.data.aws_partition.current: Reading...
+module.glue_role.data.aws_caller_identity.current: Reading...
+module.glue_role.data.aws_region.current: Reading...
+module.glue_role.data.aws_region.current: Read complete after 0s [id=ap-south-1]
+module.glue_role.data.aws_partition.current: Read complete after 0s [id=aws]
+data.aws_caller_identity.current: Read complete after 0s [id=129373676098]
+module.glue_role.data.aws_caller_identity.current: Read complete after 0s [id=129373676098]
+module.glue_role.data.aws_iam_policy_document.assume: Reading...
+module.glue_role.data.aws_iam_policy_document.assume: Read complete after 0s [id=1379948700]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+ <= read (data resources)
+
+Terraform will perform the following actions:
+
+  # module.data_lake.data.aws_iam_policy_document.lake will be read during apply
+  # (config refers to values not yet known)
+ <= data "aws_iam_policy_document" "lake" {
+      + id            = (known after apply)
+      + json          = (known after apply)
+      + minified_json = (known after apply)
+
+      + statement {
+          + actions   = [
+              + "s3:*",
+            ]
+          + effect    = "Deny"
+          + resources = [
+              + (known after apply),
+              + (known after apply),
+            ]
+          + sid       = "DenyInsecureTransport"
+
+          + condition {
+              + test     = "Bool"
+              + values   = [
+                  + "false",
+                ]
+              + variable = "aws:SecureTransport"
+            }
+
+          + principals {
+              + identifiers = [
+                  + "*",
+                ]
+              + type        = "*"
+            }
+        }
+    }
+
+  # module.data_lake.aws_kms_alias.lake will be created
+  + resource "aws_kms_alias" "lake" {
+      + arn            = (known after apply)
+      + id             = (known after apply)
+      + name           = "alias/retail-data-lake-dev"
+      + name_prefix    = (known after apply)
+      + target_key_arn = (known after apply)
+      + target_key_id  = (known after apply)
+    }
+
+  # module.data_lake.aws_kms_key.lake will be created
+  + resource "aws_kms_key" "lake" {
+      + arn                                = (known after apply)
+      + bypass_policy_lockout_safety_check = false
+      + customer_master_key_spec           = "SYMMETRIC_DEFAULT"
+      + deletion_window_in_days            = 30
+      + description                        = "Encrypts the dev retail data lake"
+      + enable_key_rotation                = true
+      + id                                 = (known after apply)
+      + is_enabled                         = true
+      + key_id                             = (known after apply)
+      + key_usage                          = "ENCRYPT_DECRYPT"
+      + multi_region                       = (known after apply)
+      + policy                             = (known after apply)
+      + rotation_period_in_days            = (known after apply)
+      + tags                               = {
+          + "Environment" = "dev"
+          + "Module"      = "s3_data_lake"
+        }
+      + tags_all                           = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Module"      = "s3_data_lake"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+    }
+
+  # module.data_lake.aws_s3_bucket.lake will be created
+  + resource "aws_s3_bucket" "lake" {
+      + acceleration_status         = (known after apply)
+      + acl                         = (known after apply)
+      + arn                         = (known after apply)
+      + bucket                      = "retail-data-lake-dev-676098"
+      + bucket_domain_name          = (known after apply)
+      + bucket_prefix               = (known after apply)
+      + bucket_regional_domain_name = (known after apply)
+      + force_destroy               = true
+      + hosted_zone_id              = (known after apply)
+      + id                          = (known after apply)
+      + object_lock_enabled         = (known after apply)
+      + policy                      = (known after apply)
+      + region                      = (known after apply)
+      + request_payer               = (known after apply)
+      + tags                        = {
+          + "Environment" = "dev"
+          + "Module"      = "s3_data_lake"
+        }
+      + tags_all                    = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Module"      = "s3_data_lake"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + website_domain              = (known after apply)
+      + website_endpoint            = (known after apply)
+
+      + cors_rule (known after apply)
+
+      + grant (known after apply)
+
+      + lifecycle_rule (known after apply)
+
+      + logging (known after apply)
+
+      + object_lock_configuration (known after apply)
+
+      + replication_configuration (known after apply)
+
+      + server_side_encryption_configuration (known after apply)
+
+      + versioning (known after apply)
+
+      + website (known after apply)
+    }
+
+  # module.data_lake.aws_s3_bucket.logs will be created
+  + resource "aws_s3_bucket" "logs" {
+      + acceleration_status         = (known after apply)
+      + acl                         = (known after apply)
+      + arn                         = (known after apply)
+      + bucket                      = "retail-data-lake-dev-676098-access-logs"
+      + bucket_domain_name          = (known after apply)
+      + bucket_prefix               = (known after apply)
+      + bucket_regional_domain_name = (known after apply)
+      + force_destroy               = true
+      + hosted_zone_id              = (known after apply)
+      + id                          = (known after apply)
+      + object_lock_enabled         = (known after apply)
+      + policy                      = (known after apply)
+      + region                      = (known after apply)
+      + request_payer               = (known after apply)
+      + tags                        = {
+          + "Environment" = "dev"
+          + "Module"      = "s3_data_lake"
+        }
+      + tags_all                    = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Module"      = "s3_data_lake"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + website_domain              = (known after apply)
+      + website_endpoint            = (known after apply)
+
+      + cors_rule (known after apply)
+
+      + grant (known after apply)
+
+      + lifecycle_rule (known after apply)
+
+      + logging (known after apply)
+
+      + object_lock_configuration (known after apply)
+
+      + replication_configuration (known after apply)
+
+      + server_side_encryption_configuration (known after apply)
+
+      + versioning (known after apply)
+
+      + website (known after apply)
+    }
+
+  # module.data_lake.aws_s3_bucket_lifecycle_configuration.lake will be created
+  + resource "aws_s3_bucket_lifecycle_configuration" "lake" {
+      + bucket                                 = (known after apply)
+      + expected_bucket_owner                  = (known after apply)
+      + id                                     = (known after apply)
+      + transition_default_minimum_object_size = "all_storage_classes_128K"
+
+      + rule {
+          + id     = "raw-tiering"
+          + status = "Enabled"
+            # (1 unchanged attribute hidden)
+
+          + expiration {
+              + days                         = 30
+              + expired_object_delete_marker = false
+            }
+
+          + filter {
+              + prefix = "raw/"
+            }
+
+          + transition {
+              + days          = 30
+              + storage_class = "STANDARD_IA"
+            }
+          + transition {
+              + days          = 90
+              + storage_class = "GLACIER_IR"
+            }
+        }
+      + rule {
+          + id     = "processed-intelligent-tiering"
+          + status = "Enabled"
+            # (1 unchanged attribute hidden)
+
+          + filter {
+              + prefix = "processed/"
+            }
+
+          + transition {
+              + days          = 0
+              + storage_class = "INTELLIGENT_TIERING"
+            }
+        }
+      + rule {
+          + id     = "quarantine-expiry"
+          + status = "Enabled"
+            # (1 unchanged attribute hidden)
+
+          + expiration {
+              + days                         = 90
+              + expired_object_delete_marker = false
+            }
+
+          + filter {
+              + prefix = "quarantine/"
+            }
+        }
+      + rule {
+          + id     = "dlq-expiry"
+          + status = "Enabled"
+            # (1 unchanged attribute hidden)
+
+          + expiration {
+              + days                         = 90
+              + expired_object_delete_marker = false
+            }
+
+          + filter {
+              + prefix = "dlq/"
+            }
+        }
+      + rule {
+          + id     = "housekeeping"
+          + status = "Enabled"
+            # (1 unchanged attribute hidden)
+
+          + abort_incomplete_multipart_upload {
+              + days_after_initiation = 7
+            }
+
+          + filter {
+                # (1 unchanged attribute hidden)
+            }
+
+          + noncurrent_version_expiration {
+              + noncurrent_days = 30
+            }
+        }
+    }
+
+  # module.data_lake.aws_s3_bucket_lifecycle_configuration.logs will be created
+  + resource "aws_s3_bucket_lifecycle_configuration" "logs" {
+      + bucket                                 = (known after apply)
+      + expected_bucket_owner                  = (known after apply)
+      + id                                     = (known after apply)
+      + transition_default_minimum_object_size = "all_storage_classes_128K"
+
+      + rule {
+          + id     = "expire-access-logs"
+          + status = "Enabled"
+            # (1 unchanged attribute hidden)
+
+          + expiration {
+              + days                         = 365
+              + expired_object_delete_marker = false
+            }
+
+          + filter {
+                # (1 unchanged attribute hidden)
+            }
+        }
+    }
+
+  # module.data_lake.aws_s3_bucket_logging.lake will be created
+  + resource "aws_s3_bucket_logging" "lake" {
+      + bucket        = (known after apply)
+      + id            = (known after apply)
+      + target_bucket = (known after apply)
+      + target_prefix = "s3-access/"
+    }
+
+  # module.data_lake.aws_s3_bucket_ownership_controls.lake will be created
+  + resource "aws_s3_bucket_ownership_controls" "lake" {
+      + bucket = (known after apply)
+      + id     = (known after apply)
+
+      + rule {
+          + object_ownership = "BucketOwnerEnforced"
+        }
+    }
+
+  # module.data_lake.aws_s3_bucket_policy.lake will be created
+  + resource "aws_s3_bucket_policy" "lake" {
+      + bucket = (known after apply)
+      + id     = (known after apply)
+      + policy = (known after apply)
+    }
+
+  # module.data_lake.aws_s3_bucket_public_access_block.lake will be created
+  + resource "aws_s3_bucket_public_access_block" "lake" {
+      + block_public_acls       = true
+      + block_public_policy     = true
+      + bucket                  = (known after apply)
+      + id                      = (known after apply)
+      + ignore_public_acls      = true
+      + restrict_public_buckets = true
+    }
+
+  # module.data_lake.aws_s3_bucket_public_access_block.logs will be created
+  + resource "aws_s3_bucket_public_access_block" "logs" {
+      + block_public_acls       = true
+      + block_public_policy     = true
+      + bucket                  = (known after apply)
+      + id                      = (known after apply)
+      + ignore_public_acls      = true
+      + restrict_public_buckets = true
+    }
+
+  # module.data_lake.aws_s3_bucket_server_side_encryption_configuration.lake will be created
+  + resource "aws_s3_bucket_server_side_encryption_configuration" "lake" {
+      + bucket = (known after apply)
+      + id     = (known after apply)
+
+      + rule {
+          + bucket_key_enabled = true
+
+          + apply_server_side_encryption_by_default {
+              + kms_master_key_id = (known after apply)
+              + sse_algorithm     = "aws:kms"
+            }
+        }
+    }
+
+  # module.data_lake.aws_s3_bucket_server_side_encryption_configuration.logs will be created
+  + resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
+      + bucket = (known after apply)
+      + id     = (known after apply)
+
+      + rule {
+          + apply_server_side_encryption_by_default {
+              + sse_algorithm     = "AES256"
+                # (1 unchanged attribute hidden)
+            }
+        }
+    }
+
+  # module.data_lake.aws_s3_bucket_versioning.lake will be created
+  + resource "aws_s3_bucket_versioning" "lake" {
+      + bucket = (known after apply)
+      + id     = (known after apply)
+
+      + versioning_configuration {
+          + mfa_delete = (known after apply)
+          + status     = "Enabled"
+        }
+    }
+
+  # module.data_lake.aws_s3_object.layers["_state/"] will be created
+  + resource "aws_s3_object" "layers" {
+      + acl                    = (known after apply)
+      + arn                    = (known after apply)
+      + bucket                 = (known after apply)
+      + bucket_key_enabled     = (known after apply)
+      + checksum_crc32         = (known after apply)
+      + checksum_crc32c        = (known after apply)
+      + checksum_crc64nvme     = (known after apply)
+      + checksum_sha1          = (known after apply)
+      + checksum_sha256        = (known after apply)
+      + content_type           = (known after apply)
+      + etag                   = (known after apply)
+      + force_destroy          = false
+      + id                     = (known after apply)
+      + key                    = "_state/"
+      + kms_key_id             = (known after apply)
+      + server_side_encryption = (known after apply)
+      + storage_class          = (known after apply)
+      + tags_all               = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + version_id             = (known after apply)
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.data_lake.aws_s3_object.layers["curated/"] will be created
+  + resource "aws_s3_object" "layers" {
+      + acl                    = (known after apply)
+      + arn                    = (known after apply)
+      + bucket                 = (known after apply)
+      + bucket_key_enabled     = (known after apply)
+      + checksum_crc32         = (known after apply)
+      + checksum_crc32c        = (known after apply)
+      + checksum_crc64nvme     = (known after apply)
+      + checksum_sha1          = (known after apply)
+      + checksum_sha256        = (known after apply)
+      + content_type           = (known after apply)
+      + etag                   = (known after apply)
+      + force_destroy          = false
+      + id                     = (known after apply)
+      + key                    = "curated/"
+      + kms_key_id             = (known after apply)
+      + server_side_encryption = (known after apply)
+      + storage_class          = (known after apply)
+      + tags_all               = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + version_id             = (known after apply)
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.data_lake.aws_s3_object.layers["dlq/"] will be created
+  + resource "aws_s3_object" "layers" {
+      + acl                    = (known after apply)
+      + arn                    = (known after apply)
+      + bucket                 = (known after apply)
+      + bucket_key_enabled     = (known after apply)
+      + checksum_crc32         = (known after apply)
+      + checksum_crc32c        = (known after apply)
+      + checksum_crc64nvme     = (known after apply)
+      + checksum_sha1          = (known after apply)
+      + checksum_sha256        = (known after apply)
+      + content_type           = (known after apply)
+      + etag                   = (known after apply)
+      + force_destroy          = false
+      + id                     = (known after apply)
+      + key                    = "dlq/"
+      + kms_key_id             = (known after apply)
+      + server_side_encryption = (known after apply)
+      + storage_class          = (known after apply)
+      + tags_all               = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + version_id             = (known after apply)
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.data_lake.aws_s3_object.layers["processed/"] will be created
+  + resource "aws_s3_object" "layers" {
+      + acl                    = (known after apply)
+      + arn                    = (known after apply)
+      + bucket                 = (known after apply)
+      + bucket_key_enabled     = (known after apply)
+      + checksum_crc32         = (known after apply)
+      + checksum_crc32c        = (known after apply)
+      + checksum_crc64nvme     = (known after apply)
+      + checksum_sha1          = (known after apply)
+      + checksum_sha256        = (known after apply)
+      + content_type           = (known after apply)
+      + etag                   = (known after apply)
+      + force_destroy          = false
+      + id                     = (known after apply)
+      + key                    = "processed/"
+      + kms_key_id             = (known after apply)
+      + server_side_encryption = (known after apply)
+      + storage_class          = (known after apply)
+      + tags_all               = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + version_id             = (known after apply)
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.data_lake.aws_s3_object.layers["quarantine/"] will be created
+  + resource "aws_s3_object" "layers" {
+      + acl                    = (known after apply)
+      + arn                    = (known after apply)
+      + bucket                 = (known after apply)
+      + bucket_key_enabled     = (known after apply)
+      + checksum_crc32         = (known after apply)
+      + checksum_crc32c        = (known after apply)
+      + checksum_crc64nvme     = (known after apply)
+      + checksum_sha1          = (known after apply)
+      + checksum_sha256        = (known after apply)
+      + content_type           = (known after apply)
+      + etag                   = (known after apply)
+      + force_destroy          = false
+      + id                     = (known after apply)
+      + key                    = "quarantine/"
+      + kms_key_id             = (known after apply)
+      + server_side_encryption = (known after apply)
+      + storage_class          = (known after apply)
+      + tags_all               = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + version_id             = (known after apply)
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.data_lake.aws_s3_object.layers["raw/"] will be created
+  + resource "aws_s3_object" "layers" {
+      + acl                    = (known after apply)
+      + arn                    = (known after apply)
+      + bucket                 = (known after apply)
+      + bucket_key_enabled     = (known after apply)
+      + checksum_crc32         = (known after apply)
+      + checksum_crc32c        = (known after apply)
+      + checksum_crc64nvme     = (known after apply)
+      + checksum_sha1          = (known after apply)
+      + checksum_sha256        = (known after apply)
+      + content_type           = (known after apply)
+      + etag                   = (known after apply)
+      + force_destroy          = false
+      + id                     = (known after apply)
+      + key                    = "raw/"
+      + kms_key_id             = (known after apply)
+      + server_side_encryption = (known after apply)
+      + storage_class          = (known after apply)
+      + tags_all               = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + version_id             = (known after apply)
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.data_lake.aws_s3_object.layers["scripts/"] will be created
+  + resource "aws_s3_object" "layers" {
+      + acl                    = (known after apply)
+      + arn                    = (known after apply)
+      + bucket                 = (known after apply)
+      + bucket_key_enabled     = (known after apply)
+      + checksum_crc32         = (known after apply)
+      + checksum_crc32c        = (known after apply)
+      + checksum_crc64nvme     = (known after apply)
+      + checksum_sha1          = (known after apply)
+      + checksum_sha256        = (known after apply)
+      + content_type           = (known after apply)
+      + etag                   = (known after apply)
+      + force_destroy          = false
+      + id                     = (known after apply)
+      + key                    = "scripts/"
+      + kms_key_id             = (known after apply)
+      + server_side_encryption = (known after apply)
+      + storage_class          = (known after apply)
+      + tags_all               = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + version_id             = (known after apply)
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.glue_role.data.aws_iam_policy_document.glue will be read during apply
+  # (config refers to values not yet known)
+ <= data "aws_iam_policy_document" "glue" {
+      + id            = (known after apply)
+      + json          = (known after apply)
+      + minified_json = (known after apply)
+
+      + statement {
+          + actions   = [
+              + "s3:GetBucketLocation",
+              + "s3:ListBucket",
+            ]
+          + resources = [
+              + (known after apply),
+            ]
+          + sid       = "ListLakeBucketOnlyForOurPrefixes"
+
+          + condition {
+              + test     = "StringLike"
+              + values   = [
+                  + "raw/*",
+                  + "scripts/*",
+                  + "processed/*",
+                  + "curated/*",
+                  + "quarantine/*",
+                  + "_state/*",
+                  + "tmp/*",
+                  + null,
+                ]
+              + variable = "s3:prefix"
+            }
+        }
+      + statement {
+          + actions   = [
+              + "s3:GetObject",
+              + "s3:GetObjectVersion",
+            ]
+          + resources = [
+              + (known after apply),
+              + (known after apply),
+              + (known after apply),
+              + (known after apply),
+              + (known after apply),
+              + (known after apply),
+              + (known after apply),
+            ]
+          + sid       = "ReadInputs"
+        }
+      + statement {
+          + actions   = [
+              + "s3:AbortMultipartUpload",
+              + "s3:DeleteObject",
+              + "s3:PutObject",
+            ]
+          + resources = [
+              + (known after apply),
+              + (known after apply),
+              + (known after apply),
+              + (known after apply),
+              + (known after apply),
+            ]
+          + sid       = "WriteOutputs"
+        }
+      + statement {
+          + actions   = [
+              + "kms:Decrypt",
+              + "kms:DescribeKey",
+              + "kms:Encrypt",
+              + "kms:GenerateDataKey",
+            ]
+          + resources = [
+              + (known after apply),
+            ]
+          + sid       = "UseLakeKmsKeyOnly"
+        }
+      + statement {
+          + actions   = [
+              + "logs:AssociateKmsKey",
+              + "logs:CreateLogGroup",
+              + "logs:CreateLogStream",
+              + "logs:PutLogEvents",
+            ]
+          + resources = [
+              + "arn:aws:logs:ap-south-1:129373676098:log-group:/aws-glue/*",
+              + "arn:aws:logs:ap-south-1:129373676098:log-group:/aws-glue/retail/dev/transactions-etl:*",
+            ]
+          + sid       = "WriteOwnLogsOnly"
+        }
+      + statement {
+          + actions   = [
+              + "cloudwatch:PutMetricData",
+            ]
+          + resources = [
+              + "*",
+            ]
+          + sid       = "PublishMetricsToOwnNamespace"
+
+          + condition {
+              + test     = "StringEquals"
+              + values   = [
+                  + "Glue",
+                  + "RetailDataPlatform",
+                ]
+              + variable = "cloudwatch:namespace"
+            }
+        }
+      + statement {
+          + actions   = [
+              + "glue:BatchCreatePartition",
+              + "glue:BatchGetPartition",
+              + "glue:CreateTable",
+              + "glue:GetDatabase",
+              + "glue:GetPartition",
+              + "glue:GetPartitions",
+              + "glue:GetTable",
+              + "glue:GetTables",
+              + "glue:UpdatePartition",
+              + "glue:UpdateTable",
+            ]
+          + resources = [
+              + "arn:aws:glue:ap-south-1:129373676098:catalog",
+              + "arn:aws:glue:ap-south-1:129373676098:database/retail_lake_dev",
+              + "arn:aws:glue:ap-south-1:129373676098:table/retail_lake_dev/*",
+            ]
+          + sid       = "GlueCatalogForOwnDatabase"
+        }
+    }
+
+  # module.glue_role.aws_iam_role.glue will be created
+  + resource "aws_iam_role" "glue" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Condition = {
+                          + StringEquals = {
+                              + "aws:SourceAccount" = "129373676098"
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "glue.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "retail-glue-etl-dev"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # module.glue_role.aws_iam_role_policy.glue will be created
+  + resource "aws_iam_role_policy" "glue" {
+      + id          = (known after apply)
+      + name        = "least-privilege-etl"
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # module.monitoring.data.aws_iam_policy_document.sns will be read during apply
+  # (config refers to values not yet known)
+ <= data "aws_iam_policy_document" "sns" {
+      + id            = (known after apply)
+      + json          = (known after apply)
+      + minified_json = (known after apply)
+
+      + statement {
+          + actions   = [
+              + "sns:Publish",
+            ]
+          + resources = [
+              + (known after apply),
+            ]
+          + sid       = "AllowEventBridgeAndCloudWatch"
+
+          + principals {
+              + identifiers = [
+                  + "cloudwatch.amazonaws.com",
+                  + "events.amazonaws.com",
+                ]
+              + type        = "Service"
+            }
+        }
+    }
+
+  # module.monitoring.aws_cloudwatch_dashboard.this will be created
+  + resource "aws_cloudwatch_dashboard" "this" {
+      + dashboard_arn  = (known after apply)
+      + dashboard_body = jsonencode(
+            {
+              + widgets = [
+                  + {
+                      + height     = 6
+                      + properties = {
+                          + metrics = [
+                              + [
+                                  + "RetailDataPlatform",
+                                  + "RowsValid",
+                                ],
+                              + [
+                                  + "RetailDataPlatform",
+                                  + "RowsQuarantined",
+                                ],
+                            ]
+                          + period  = 3600
+                          + region  = "ap-south-1"
+                          + stat    = "Sum"
+                          + title   = "Rows per ETL run (valid vs quarantined)"
+                        }
+                      + type       = "metric"
+                      + width      = 12
+                      + x          = 0
+                      + y          = 0
+                    },
+                  + {
+                      + height     = 6
+                      + properties = {
+                          + query  = "SOURCE '/aws-glue/retail/dev/transactions-etl' | filter event = 'DQ_METRICS' | fields @timestamp, rows_read, rows_valid, rows_quarantined, duplicates_removed, duration_sec | sort @timestamp desc | limit 20"
+                          + region = "ap-south-1"
+                          + title  = "Latest DQ metrics"
+                        }
+                      + type       = "log"
+                      + width      = 12
+                      + x          = 12
+                      + y          = 0
+                    },
+                ]
+            }
+        )
+      + dashboard_name = "retail-data-platform-dev"
+      + id             = (known after apply)
+    }
+
+  # module.monitoring.aws_cloudwatch_event_rule.glue_failed will be created
+  + resource "aws_cloudwatch_event_rule" "glue_failed" {
+      + arn            = (known after apply)
+      + description    = "Glue ETL job failed, timed out or was stopped"
+      + event_bus_name = "default"
+      + event_pattern  = jsonencode(
+            {
+              + detail      = {
+                  + jobName = [
+                      + "retail-transactions-etl-dev",
+                    ]
+                  + state   = [
+                      + "FAILED",
+                      + "TIMEOUT",
+                      + "STOPPED",
+                    ]
+                }
+              + detail-type = [
+                  + "Glue Job State Change",
+                ]
+              + source      = [
+                  + "aws.glue",
+                ]
+            }
+        )
+      + force_destroy  = false
+      + id             = (known after apply)
+      + name           = "retail-glue-failed-dev"
+      + name_prefix    = (known after apply)
+      + tags_all       = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+    }
+
+  # module.monitoring.aws_cloudwatch_event_target.glue_failed will be created
+  + resource "aws_cloudwatch_event_target" "glue_failed" {
+      + arn            = (known after apply)
+      + event_bus_name = "default"
+      + force_destroy  = false
+      + id             = (known after apply)
+      + rule           = "retail-glue-failed-dev"
+      + target_id      = (known after apply)
+
+      + input_transformer {
+          + input_paths    = {
+              + "job"   = "$.detail.jobName"
+              + "msg"   = "$.detail.message"
+              + "run"   = "$.detail.jobRunId"
+              + "state" = "$.detail.state"
+            }
+          + input_template = "\"[DEV] Glue job <job> is <state>. Run: <run>. Reason: <msg>\""
+        }
+    }
+
+  # module.monitoring.aws_cloudwatch_log_metric_filter.etl_failed will be created
+  + resource "aws_cloudwatch_log_metric_filter" "etl_failed" {
+      + id             = (known after apply)
+      + log_group_name = "/aws-glue/retail/dev/transactions-etl"
+      + name           = "etl-run-failed"
+      + pattern        = "\"ETL run FAILED\""
+
+      + metric_transformation {
+          + name      = "EtlRunFailed"
+          + namespace = "RetailDataPlatform"
+          + unit      = "Count"
+          + value     = "1"
+        }
+    }
+
+  # module.monitoring.aws_cloudwatch_log_metric_filter.rows_quarantined will be created
+  + resource "aws_cloudwatch_log_metric_filter" "rows_quarantined" {
+      + id             = (known after apply)
+      + log_group_name = "/aws-glue/retail/dev/transactions-etl"
+      + name           = "dq-rows-quarantined"
+      + pattern        = "{ $.event = \"DQ_METRICS\" }"
+
+      + metric_transformation {
+          + name      = "RowsQuarantined"
+          + namespace = "RetailDataPlatform"
+          + unit      = "Count"
+          + value     = "$.rows_quarantined"
+        }
+    }
+
+  # module.monitoring.aws_cloudwatch_log_metric_filter.rows_valid will be created
+  + resource "aws_cloudwatch_log_metric_filter" "rows_valid" {
+      + id             = (known after apply)
+      + log_group_name = "/aws-glue/retail/dev/transactions-etl"
+      + name           = "dq-rows-valid"
+      + pattern        = "{ $.event = \"DQ_METRICS\" }"
+
+      + metric_transformation {
+          + name      = "RowsValid"
+          + namespace = "RetailDataPlatform"
+          + unit      = "Count"
+          + value     = "$.rows_valid"
+        }
+    }
+
+  # module.monitoring.aws_cloudwatch_metric_alarm.dq_quarantine_high will be created
+  + resource "aws_cloudwatch_metric_alarm" "dq_quarantine_high" {
+      + actions_enabled                       = true
+      + alarm_actions                         = (known after apply)
+      + alarm_description                     = "More than 5000 rows failed data-quality rules in one run - check the source system."
+      + alarm_name                            = "retail-dq-quarantine-high-dev"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "GreaterThanThreshold"
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 1
+      + id                                    = (known after apply)
+      + metric_name                           = "RowsQuarantined"
+      + namespace                             = "RetailDataPlatform"
+      + period                                = 3600
+      + statistic                             = "Maximum"
+      + tags_all                              = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + threshold                             = 5000
+      + treat_missing_data                    = "notBreaching"
+    }
+
+  # module.monitoring.aws_cloudwatch_metric_alarm.etl_failed will be created
+  + resource "aws_cloudwatch_metric_alarm" "etl_failed" {
+      + actions_enabled                       = true
+      + alarm_actions                         = (known after apply)
+      + alarm_description                     = "The ETL logged a fatal error. Check the log group /aws-glue/retail/dev/transactions-etl."
+      + alarm_name                            = "retail-etl-failed-dev"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "GreaterThanThreshold"
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 1
+      + id                                    = (known after apply)
+      + metric_name                           = "EtlRunFailed"
+      + namespace                             = "RetailDataPlatform"
+      + period                                = 300
+      + statistic                             = "Sum"
+      + tags_all                              = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + threshold                             = 0
+      + treat_missing_data                    = "notBreaching"
+    }
+
+  # module.monitoring.aws_cloudwatch_metric_alarm.no_data_loaded will be created
+  + resource "aws_cloudwatch_metric_alarm" "no_data_loaded" {
+      + actions_enabled                       = true
+      + alarm_actions                         = (known after apply)
+      + alarm_description                     = "No ETL run reported valid rows in the last ~26h (job not scheduled, or upstream sent nothing)."
+      + alarm_name                            = "retail-no-data-loaded-dev"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "LessThanThreshold"
+      + datapoints_to_alarm                   = 26
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 26
+      + id                                    = (known after apply)
+      + metric_name                           = "RowsValid"
+      + namespace                             = "RetailDataPlatform"
+      + period                                = 3600
+      + statistic                             = "Sum"
+      + tags_all                              = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + threshold                             = 1
+      + treat_missing_data                    = "breaching"
+    }
+
+  # module.monitoring.aws_sns_topic.alerts will be created
+  + resource "aws_sns_topic" "alerts" {
+      + arn                         = (known after apply)
+      + beginning_archive_time      = (known after apply)
+      + content_based_deduplication = false
+      + fifo_throughput_scope       = (known after apply)
+      + fifo_topic                  = false
+      + id                          = (known after apply)
+      + kms_master_key_id           = "alias/aws/sns"
+      + name                        = "retail-data-alerts-dev"
+      + name_prefix                 = (known after apply)
+      + owner                       = (known after apply)
+      + policy                      = (known after apply)
+      + signature_version           = (known after apply)
+      + tags_all                    = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + tracing_config              = (known after apply)
+    }
+
+  # module.monitoring.aws_sns_topic_policy.alerts will be created
+  + resource "aws_sns_topic_policy" "alerts" {
+      + arn    = (known after apply)
+      + id     = (known after apply)
+      + owner  = (known after apply)
+      + policy = (known after apply)
+    }
+
+  # module.transactions_etl.aws_cloudwatch_log_group.job will be created
+  + resource "aws_cloudwatch_log_group" "job" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + log_group_class   = (known after apply)
+      + name              = "/aws-glue/retail/dev/transactions-etl"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 7
+      + skip_destroy      = false
+      + tags_all          = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+    }
+
+  # module.transactions_etl.aws_glue_catalog_database.this will be created
+  + resource "aws_glue_catalog_database" "this" {
+      + arn          = (known after apply)
+      + catalog_id   = (known after apply)
+      + description  = "Retail data lake - dev"
+      + id           = (known after apply)
+      + location_uri = (known after apply)
+      + name         = "retail_lake_dev"
+      + tags_all     = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+
+      + create_table_default_permission (known after apply)
+    }
+
+  # module.transactions_etl.aws_glue_crawler.outputs will be created
+  + resource "aws_glue_crawler" "outputs" {
+      + arn           = (known after apply)
+      + configuration = jsonencode(
+            {
+              + Grouping = {
+                  + TableGroupingPolicy = "CombineCompatibleSchemas"
+                }
+              + Version  = 1
+            }
+        )
+      + database_name = "retail_lake_dev"
+      + id            = (known after apply)
+      + name          = "retail-transactions-etl-dev-crawler"
+      + role          = (known after apply)
+      + tags_all      = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+
+      + recrawl_policy {
+          + recrawl_behavior = "CRAWL_NEW_FOLDERS_ONLY"
+        }
+
+      + s3_target {
+          + path = (known after apply)
+        }
+      + s3_target {
+          + path = (known after apply)
+        }
+      + s3_target {
+          + path = (known after apply)
+        }
+
+      + schema_change_policy {
+          + delete_behavior = "LOG"
+          + update_behavior = "LOG"
+        }
+    }
+
+  # module.transactions_etl.aws_glue_job.this will be created
+  + resource "aws_glue_job" "this" {
+      + arn                    = (known after apply)
+      + default_arguments      = (known after apply)
+      + description            = "Raw -> processed -> curated transactions ETL (dev)"
+      + execution_class        = "FLEX"
+      + glue_version           = "4.0"
+      + id                     = (known after apply)
+      + max_capacity           = (known after apply)
+      + max_retries            = 1
+      + name                   = "retail-transactions-etl-dev"
+      + number_of_workers      = 2
+      + role_arn               = (known after apply)
+      + security_configuration = "retail-transactions-etl-dev-sec"
+      + tags_all               = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + timeout                = 60
+      + worker_type            = "G.1X"
+
+      + command {
+          + name            = "glueetl"
+          + python_version  = "3"
+          + runtime         = (known after apply)
+          + script_location = (known after apply)
+        }
+
+      + execution_property {
+          + max_concurrent_runs = 1
+        }
+
+      + notification_property (known after apply)
+    }
+
+  # module.transactions_etl.aws_glue_security_configuration.this will be created
+  + resource "aws_glue_security_configuration" "this" {
+      + id   = (known after apply)
+      + name = "retail-transactions-etl-dev-sec"
+
+      + encryption_configuration {
+          + cloudwatch_encryption {
+              + cloudwatch_encryption_mode = "DISABLED"
+            }
+          + job_bookmarks_encryption {
+              + job_bookmarks_encryption_mode = "CSE-KMS"
+              + kms_key_arn                   = (known after apply)
+            }
+          + s3_encryption {
+              + kms_key_arn        = (known after apply)
+              + s3_encryption_mode = "SSE-KMS"
+            }
+        }
+    }
+
+  # module.transactions_etl.aws_glue_trigger.crawl_after_etl will be created
+  + resource "aws_glue_trigger" "crawl_after_etl" {
+      + arn      = (known after apply)
+      + enabled  = true
+      + id       = (known after apply)
+      + name     = "retail-transactions-etl-dev-crawl-on-success"
+      + state    = (known after apply)
+      + tags_all = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + type     = "CONDITIONAL"
+
+      + actions {
+          + crawler_name = "retail-transactions-etl-dev-crawler"
+        }
+
+      + predicate {
+          + logical = "AND"
+
+          + conditions {
+              + job_name         = "retail-transactions-etl-dev"
+              + logical_operator = "EQUALS"
+              + state            = "SUCCEEDED"
+            }
+        }
+    }
+
+  # module.transactions_etl.aws_s3_object.script will be created
+  + resource "aws_s3_object" "script" {
+      + acl                    = (known after apply)
+      + arn                    = (known after apply)
+      + bucket                 = (known after apply)
+      + bucket_key_enabled     = (known after apply)
+      + checksum_crc32         = (known after apply)
+      + checksum_crc32c        = (known after apply)
+      + checksum_crc64nvme     = (known after apply)
+      + checksum_sha1          = (known after apply)
+      + checksum_sha256        = (known after apply)
+      + content_type           = (known after apply)
+      + etag                   = "5be3a4cecda77038615189a80268aa3e"
+      + force_destroy          = false
+      + id                     = (known after apply)
+      + key                    = "scripts/transactions-etl/5be3a4cecda77038615189a80268aa3e/transactions_etl.py"
+      + kms_key_id             = (known after apply)
+      + server_side_encryption = (known after apply)
+      + source                 = "./../../pyspark/transactions_etl.py"
+      + storage_class          = (known after apply)
+      + tags_all               = {
+          + "DataClass"   = "confidential"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Owner"       = "data-engineering"
+          + "Project"     = "retail"
+        }
+      + version_id             = (known after apply)
+    }
+
+Plan: 41 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + alerts_topic_arn = (known after apply)
+  + data_lake_bucket = (known after apply)
+  + data_lake_layers = {
+      + curated    = (known after apply)
+      + processed  = (known after apply)
+      + quarantine = (known after apply)
+      + raw        = (known after apply)
+      + scripts    = (known after apply)
+      + state      = (known after apply)
+    }
+  + glue_job_name    = "retail-transactions-etl-dev"
+  + glue_role_arn    = (known after apply)
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: dev.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "dev.tfplan"
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live$ terraform apply dev.tfplan
+module.transactions_etl.aws_cloudwatch_log_group.job: Creating...
+module.transactions_etl.aws_glue_catalog_database.this: Creating...
+module.monitoring.aws_sns_topic.alerts: Creating...
+module.glue_role.aws_iam_role.glue: Creating...
+module.data_lake.aws_kms_key.lake: Creating...
+module.data_lake.aws_s3_bucket.lake: Creating...
+module.data_lake.aws_s3_bucket.logs: Creating...
+module.transactions_etl.aws_cloudwatch_log_group.job: Creation complete after 0s [id=/aws-glue/retail/dev/transactions-etl]
+module.monitoring.aws_cloudwatch_dashboard.this: Creating...
+module.monitoring.aws_cloudwatch_log_metric_filter.rows_valid: Creating...
+module.monitoring.aws_cloudwatch_log_metric_filter.etl_failed: Creating...
+module.monitoring.aws_cloudwatch_log_metric_filter.rows_quarantined: Creating...
+module.monitoring.aws_cloudwatch_log_metric_filter.rows_quarantined: Creation complete after 0s [id=dq-rows-quarantined]
+module.monitoring.aws_cloudwatch_log_metric_filter.etl_failed: Creation complete after 0s [id=etl-run-failed]
+module.monitoring.aws_sns_topic.alerts: Creation complete after 0s [id=arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev]
+module.monitoring.data.aws_iam_policy_document.sns: Reading...
+module.monitoring.data.aws_iam_policy_document.sns: Read complete after 0s [id=494622717]
+module.monitoring.aws_cloudwatch_metric_alarm.dq_quarantine_high: Creating...
+module.monitoring.aws_cloudwatch_metric_alarm.etl_failed: Creating...
+module.monitoring.aws_cloudwatch_metric_alarm.no_data_loaded: Creating...
+module.monitoring.aws_sns_topic_policy.alerts: Creating...
+module.monitoring.aws_cloudwatch_log_metric_filter.rows_valid: Creation complete after 0s [id=dq-rows-valid]
+module.monitoring.aws_sns_topic_policy.alerts: Creation complete after 1s [id=arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev]
+module.monitoring.aws_cloudwatch_metric_alarm.dq_quarantine_high: Creation complete after 1s [id=retail-dq-quarantine-high-dev]
+module.monitoring.aws_cloudwatch_metric_alarm.etl_failed: Creation complete after 1s [id=retail-etl-failed-dev]
+module.monitoring.aws_cloudwatch_metric_alarm.no_data_loaded: Creation complete after 1s [id=retail-no-data-loaded-dev]
+module.monitoring.aws_cloudwatch_dashboard.this: Creation complete after 2s [id=retail-data-platform-dev]
+module.glue_role.aws_iam_role.glue: Creation complete after 2s [id=retail-glue-etl-dev]
+module.data_lake.aws_s3_bucket.logs: Creation complete after 2s [id=retail-data-lake-dev-676098-access-logs]
+module.data_lake.aws_s3_bucket_public_access_block.logs: Creating...
+module.data_lake.aws_s3_bucket_server_side_encryption_configuration.logs: Creating...
+module.data_lake.aws_s3_bucket_lifecycle_configuration.logs: Creating...
+module.data_lake.aws_s3_bucket.lake: Creation complete after 2s [id=retail-data-lake-dev-676098]
+module.data_lake.data.aws_iam_policy_document.lake: Reading...
+module.data_lake.aws_s3_bucket_ownership_controls.lake: Creating...
+module.data_lake.aws_s3_bucket_versioning.lake: Creating...
+module.data_lake.aws_s3_bucket_logging.lake: Creating...
+module.data_lake.data.aws_iam_policy_document.lake: Read complete after 0s [id=4112631249]
+module.data_lake.aws_s3_bucket_public_access_block.lake: Creating...
+module.data_lake.aws_s3_object.layers["_state/"]: Creating...
+module.data_lake.aws_s3_object.layers["raw/"]: Creating...
+module.data_lake.aws_s3_bucket_public_access_block.logs: Creation complete after 0s [id=retail-data-lake-dev-676098-access-logs]
+module.data_lake.aws_s3_object.layers["curated/"]: Creating...
+module.data_lake.aws_s3_object.layers["raw/"]: Creation complete after 1s [id=raw/]
+module.data_lake.aws_s3_object.layers["processed/"]: Creating...
+module.data_lake.aws_s3_object.layers["_state/"]: Creation complete after 1s [id=_state/]
+module.data_lake.aws_s3_object.layers["dlq/"]: Creating...
+module.data_lake.aws_s3_object.layers["curated/"]: Creation complete after 1s [id=curated/]
+module.data_lake.aws_s3_object.layers["quarantine/"]: Creating...
+module.data_lake.aws_s3_object.layers["processed/"]: Creation complete after 0s [id=processed/]
+module.data_lake.aws_s3_object.layers["scripts/"]: Creating...
+module.data_lake.aws_s3_object.layers["dlq/"]: Creation complete after 0s [id=dlq/]
+module.data_lake.aws_s3_object.layers["quarantine/"]: Creation complete after 0s [id=quarantine/]
+module.transactions_etl.aws_s3_object.script: Creating...
+module.data_lake.aws_s3_object.layers["scripts/"]: Creation complete after 0s [id=scripts/]
+module.data_lake.aws_s3_bucket_public_access_block.lake: Creation complete after 1s [id=retail-data-lake-dev-676098]
+module.data_lake.aws_s3_bucket_policy.lake: Creating...
+module.data_lake.aws_s3_bucket_server_side_encryption_configuration.logs: Creation complete after 1s [id=retail-data-lake-dev-676098-access-logs]
+module.data_lake.aws_s3_bucket_ownership_controls.lake: Creation complete after 1s [id=retail-data-lake-dev-676098]
+module.data_lake.aws_s3_bucket_logging.lake: Creation complete after 1s [id=retail-data-lake-dev-676098]
+module.transactions_etl.aws_s3_object.script: Creation complete after 0s [id=scripts/transactions-etl/5be3a4cecda77038615189a80268aa3e/transactions_etl.py]
+module.data_lake.aws_s3_bucket_policy.lake: Creation complete after 0s [id=retail-data-lake-dev-676098]
+module.data_lake.aws_s3_bucket_versioning.lake: Creation complete after 2s [id=retail-data-lake-dev-676098]
+module.data_lake.aws_s3_bucket_lifecycle_configuration.lake: Creating...
+module.data_lake.aws_kms_key.lake: Creation complete after 9s [id=e4d6829a-265b-40a3-902a-920eb17dd5ff]
+module.data_lake.aws_kms_alias.lake: Creating...
+module.transactions_etl.aws_glue_security_configuration.this: Creating...
+module.data_lake.aws_s3_bucket_server_side_encryption_configuration.lake: Creating...
+module.glue_role.data.aws_iam_policy_document.glue: Reading...
+module.glue_role.data.aws_iam_policy_document.glue: Read complete after 0s [id=3264364658]
+module.glue_role.aws_iam_role_policy.glue: Creating...
+module.data_lake.aws_kms_alias.lake: Creation complete after 0s [id=alias/retail-data-lake-dev]
+module.data_lake.aws_s3_bucket_server_side_encryption_configuration.lake: Creation complete after 0s [id=retail-data-lake-dev-676098]
+module.glue_role.aws_iam_role_policy.glue: Creation complete after 1s [id=retail-glue-etl-dev:least-privilege-etl]
+module.data_lake.aws_s3_bucket_lifecycle_configuration.logs: Still creating... [00m10s elapsed]
+module.data_lake.aws_s3_bucket_lifecycle_configuration.logs: Still creating... [00m20s elapsed]
+module.data_lake.aws_s3_bucket_lifecycle_configuration.logs: Still creating... [00m30s elapsed]
+module.data_lake.aws_s3_bucket_lifecycle_configuration.logs: Still creating... [00m37s elapsed]
+module.data_lake.aws_s3_bucket_lifecycle_configuration.logs: Still creating... [00m47s elapsed]
+module.data_lake.aws_s3_bucket_lifecycle_configuration.logs: Still creating... [00m57s elapsed]
+module.data_lake.aws_s3_bucket_lifecycle_configuration.logs: Creation complete after 1m0s [id=retail-data-lake-dev-676098-access-logs]
+╷
+│ Error: creating Glue Catalog Database (retail_lake_dev): operation error Glue: CreateDatabase, https response error StatusCode: 400, RequestID: ad16f7dd-a9e8-489a-a806-f7cc399cc597, api error AccessDeniedException: User: arn:aws:iam::129373676098:user/adminTerraform is not authorized to perform: glue:CreateDatabase on resource: arn:aws:glue:ap-south-1:129373676098:catalog with an explicit deny in a service control policy: arn:aws:organizations::535355705679:policy/o-346087295m/service_control_policy/p-h9javrcp
+│
+│   with module.transactions_etl.aws_glue_catalog_database.this,
+│   on ../modules/glue_job/main.tf line 12, in resource "aws_glue_catalog_database" "this":
+│   12: resource "aws_glue_catalog_database" "this" {
+│
+╵
+╷
+│ Error: creating Glue Security Configuration (retail-transactions-etl-dev-sec): operation error Glue: CreateSecurityConfiguration, https response error StatusCode: 400, RequestID: 919383e0-a6c7-4d67-b0e8-dd6ea3cf367e, api error AccessDeniedException: User: arn:aws:iam::129373676098:user/adminTerraform is not authorized to perform: glue:CreateSecurityConfiguration with an explicit deny in a service control policy: arn:aws:organizations::535355705679:policy/o-346087295m/service_control_policy/p-h9javrcp
+│
+│   with module.transactions_etl.aws_glue_security_configuration.this,
+│   on ../modules/glue_job/main.tf line 25, in resource "aws_glue_security_configuration" "this":
+│   25: resource "aws_glue_security_configuration" "this" {
+│
+╵
+╷
+│ Error: creating S3 Bucket (retail-data-lake-dev-676098) Lifecycle Configuration
+│
+│   with module.data_lake.aws_s3_bucket_lifecycle_configuration.lake,
+│   on ../modules/s3_data_lake/main.tf line 135, in resource "aws_s3_bucket_lifecycle_configuration" "lake":
+│  135: resource "aws_s3_bucket_lifecycle_configuration" "lake" {
+│
+│ operation error S3: PutBucketLifecycleConfiguration, https response error StatusCode: 400, RequestID: M1H1DMR198688X1K, HostID: EOBVnOYZYwQcPn4185NA7z/uSmfv8eq4OOjNN9o8a+On9tuvN5Z6Bqzo8KPesaocInwh++GMaz5lCu7cM4IO8ps/6HDQPCKe, api
+│ error InvalidArgument: 'Days' in the Expiration action for filter '(prefix=raw/)' must be greater than 'Days' in the Transition action
+╵
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live$ ^C^C
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live$ terraform output
+alerts_topic_arn = "arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev"
+data_lake_bucket = "retail-data-lake-dev-676098"
+data_lake_layers = {
+  "curated" = "s3://retail-data-lake-dev-676098/curated"
+  "processed" = "s3://retail-data-lake-dev-676098/processed"
+  "quarantine" = "s3://retail-data-lake-dev-676098/quarantine"
+  "raw" = "s3://retail-data-lake-dev-676098/raw"
+  "scripts" = "s3://retail-data-lake-dev-676098/scripts"
+  "state" = "s3://retail-data-lake-dev-676098/_state"
+}
+glue_job_name = "retail-transactions-etl-dev"
+glue_role_arn = "arn:aws:iam::129373676098:role/retail-glue-etl-dev"
+(.venv) harry@Bharathgift:~/primarycolors/retail-data-platform/terraform/live$ terraform destroy -var-file=envs/dev.tfvars
+module.transactions_etl.aws_cloudwatch_log_group.job: Refreshing state... [id=/aws-glue/retail/dev/transactions-etl]
+module.glue_role.data.aws_caller_identity.current: Reading...
+module.glue_role.data.aws_partition.current: Reading...
+module.data_lake.aws_kms_key.lake: Refreshing state... [id=e4d6829a-265b-40a3-902a-920eb17dd5ff]
+module.glue_role.data.aws_region.current: Reading...
+data.aws_caller_identity.current: Reading...
+module.monitoring.aws_sns_topic.alerts: Refreshing state... [id=arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev]
+module.glue_role.data.aws_region.current: Read complete after 0s [id=ap-south-1]
+module.glue_role.data.aws_partition.current: Read complete after 0s [id=aws]
+data.aws_caller_identity.current: Read complete after 0s [id=129373676098]
+module.data_lake.aws_s3_bucket.lake: Refreshing state... [id=retail-data-lake-dev-676098]
+module.data_lake.aws_s3_bucket.logs: Refreshing state... [id=retail-data-lake-dev-676098-access-logs]
+module.glue_role.data.aws_caller_identity.current: Read complete after 0s [id=129373676098]
+module.glue_role.data.aws_iam_policy_document.assume: Reading...
+module.glue_role.data.aws_iam_policy_document.assume: Read complete after 0s [id=1379948700]
+module.glue_role.aws_iam_role.glue: Refreshing state... [id=retail-glue-etl-dev]
+module.monitoring.aws_cloudwatch_dashboard.this: Refreshing state... [id=retail-data-platform-dev]
+module.monitoring.aws_cloudwatch_log_metric_filter.rows_valid: Refreshing state... [id=dq-rows-valid]
+module.monitoring.aws_cloudwatch_log_metric_filter.rows_quarantined: Refreshing state... [id=dq-rows-quarantined]
+module.monitoring.aws_cloudwatch_log_metric_filter.etl_failed: Refreshing state... [id=etl-run-failed]
+module.monitoring.aws_cloudwatch_metric_alarm.dq_quarantine_high: Refreshing state... [id=retail-dq-quarantine-high-dev]
+module.monitoring.aws_cloudwatch_metric_alarm.no_data_loaded: Refreshing state... [id=retail-no-data-loaded-dev]
+module.monitoring.aws_cloudwatch_metric_alarm.etl_failed: Refreshing state... [id=retail-etl-failed-dev]
+module.monitoring.data.aws_iam_policy_document.sns: Reading...
+module.monitoring.data.aws_iam_policy_document.sns: Read complete after 0s [id=494622717]
+module.data_lake.aws_kms_alias.lake: Refreshing state... [id=alias/retail-data-lake-dev]
+module.monitoring.aws_sns_topic_policy.alerts: Refreshing state... [id=arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev]
+module.data_lake.aws_s3_bucket_public_access_block.logs: Refreshing state... [id=retail-data-lake-dev-676098-access-logs]
+module.data_lake.aws_s3_bucket_server_side_encryption_configuration.logs: Refreshing state... [id=retail-data-lake-dev-676098-access-logs]
+module.data_lake.aws_s3_bucket_lifecycle_configuration.logs: Refreshing state... [id=retail-data-lake-dev-676098-access-logs]
+module.data_lake.aws_s3_bucket_logging.lake: Refreshing state... [id=retail-data-lake-dev-676098]
+module.data_lake.aws_s3_object.layers["raw/"]: Refreshing state... [id=raw/]
+module.data_lake.aws_s3_object.layers["quarantine/"]: Refreshing state... [id=quarantine/]
+module.data_lake.aws_s3_object.layers["scripts/"]: Refreshing state... [id=scripts/]
+module.data_lake.aws_s3_object.layers["_state/"]: Refreshing state... [id=_state/]
+module.data_lake.aws_s3_object.layers["processed/"]: Refreshing state... [id=processed/]
+module.data_lake.aws_s3_object.layers["curated/"]: Refreshing state... [id=curated/]
+module.data_lake.aws_s3_object.layers["dlq/"]: Refreshing state... [id=dlq/]
+module.data_lake.aws_s3_bucket_versioning.lake: Refreshing state... [id=retail-data-lake-dev-676098]
+module.data_lake.aws_s3_bucket_public_access_block.lake: Refreshing state... [id=retail-data-lake-dev-676098]
+module.data_lake.aws_s3_bucket_ownership_controls.lake: Refreshing state... [id=retail-data-lake-dev-676098]
+module.data_lake.aws_s3_bucket_server_side_encryption_configuration.lake: Refreshing state... [id=retail-data-lake-dev-676098]
+module.data_lake.data.aws_iam_policy_document.lake: Reading...
+module.data_lake.data.aws_iam_policy_document.lake: Read complete after 0s [id=4112631249]
+module.glue_role.data.aws_iam_policy_document.glue: Reading...
+module.transactions_etl.aws_s3_object.script: Refreshing state... [id=scripts/transactions-etl/5be3a4cecda77038615189a80268aa3e/transactions_etl.py]
+module.glue_role.data.aws_iam_policy_document.glue: Read complete after 0s [id=3264364658]
+module.data_lake.aws_s3_bucket_policy.lake: Refreshing state... [id=retail-data-lake-dev-676098]
+module.glue_role.aws_iam_role_policy.glue: Refreshing state... [id=retail-glue-etl-dev:least-privilege-etl]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  # module.data_lake.aws_kms_alias.lake will be destroyed
+  - resource "aws_kms_alias" "lake" {
+      - arn            = "arn:aws:kms:ap-south-1:129373676098:alias/retail-data-lake-dev" -> null
+      - id             = "alias/retail-data-lake-dev" -> null
+      - name           = "alias/retail-data-lake-dev" -> null
+      - target_key_arn = "arn:aws:kms:ap-south-1:129373676098:key/e4d6829a-265b-40a3-902a-920eb17dd5ff" -> null
+      - target_key_id  = "e4d6829a-265b-40a3-902a-920eb17dd5ff" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.data_lake.aws_kms_key.lake will be destroyed
+  - resource "aws_kms_key" "lake" {
+      - arn                                = "arn:aws:kms:ap-south-1:129373676098:key/e4d6829a-265b-40a3-902a-920eb17dd5ff" -> null
+      - bypass_policy_lockout_safety_check = false -> null
+      - customer_master_key_spec           = "SYMMETRIC_DEFAULT" -> null
+      - deletion_window_in_days            = 30 -> null
+      - description                        = "Encrypts the dev retail data lake" -> null
+      - enable_key_rotation                = true -> null
+      - id                                 = "e4d6829a-265b-40a3-902a-920eb17dd5ff" -> null
+      - is_enabled                         = true -> null
+      - key_id                             = "e4d6829a-265b-40a3-902a-920eb17dd5ff" -> null
+      - key_usage                          = "ENCRYPT_DECRYPT" -> null
+      - multi_region                       = false -> null
+      - policy                             = jsonencode(
+            {
+              - Id        = "key-default-1"
+              - Statement = [
+                  - {
+                      - Action    = "kms:*"
+                      - Effect    = "Allow"
+                      - Principal = {
+                          - AWS = "arn:aws:iam::129373676098:root"
+                        }
+                      - Resource  = "*"
+                      - Sid       = "Enable IAM User Permissions"
+                    },
+                ]
+              - Version   = "2012-10-17"
+            }
+        ) -> null
+      - rotation_period_in_days            = 365 -> null
+      - tags                               = {
+          - "Environment" = "dev"
+          - "Module"      = "s3_data_lake"
+        } -> null
+      - tags_all                           = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Module"      = "s3_data_lake"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+        # (2 unchanged attributes hidden)
+    }
+
+  # module.data_lake.aws_s3_bucket.lake will be destroyed
+  - resource "aws_s3_bucket" "lake" {
+      - arn                         = "arn:aws:s3:::retail-data-lake-dev-676098" -> null
+      - bucket                      = "retail-data-lake-dev-676098" -> null
+      - bucket_domain_name          = "retail-data-lake-dev-676098.s3.amazonaws.com" -> null
+      - bucket_regional_domain_name = "retail-data-lake-dev-676098.s3.ap-south-1.amazonaws.com" -> null
+      - force_destroy               = true -> null
+      - hosted_zone_id              = "Z11RGJOFQNVJUP" -> null
+      - id                          = "retail-data-lake-dev-676098" -> null
+      - object_lock_enabled         = false -> null
+      - policy                      = jsonencode(
+            {
+              - Statement = [
+                  - {
+                      - Action    = "s3:*"
+                      - Condition = {
+                          - Bool = {
+                              - "aws:SecureTransport" = "false"
+                            }
+                        }
+                      - Effect    = "Deny"
+                      - Principal = "*"
+                      - Resource  = [
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/*",
+                          - "arn:aws:s3:::retail-data-lake-dev-676098",
+                        ]
+                      - Sid       = "DenyInsecureTransport"
+                    },
+                ]
+              - Version   = "2012-10-17"
+            }
+        ) -> null
+      - region                      = "ap-south-1" -> null
+      - request_payer               = "BucketOwner" -> null
+      - tags                        = {
+          - "Environment" = "dev"
+          - "Module"      = "s3_data_lake"
+        } -> null
+      - tags_all                    = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Module"      = "s3_data_lake"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+        # (2 unchanged attributes hidden)
+
+      - grant {
+          - id          = "815851ad723a0856d297568cb65834c4b43cebc16ec1db8189de629639b7bbb8" -> null
+          - permissions = [
+              - "FULL_CONTROL",
+            ] -> null
+          - type        = "CanonicalUser" -> null
+            # (1 unchanged attribute hidden)
+        }
+
+      - logging {
+          - target_bucket = "retail-data-lake-dev-676098-access-logs" -> null
+          - target_prefix = "s3-access/" -> null
+        }
+
+      - server_side_encryption_configuration {
+          - rule {
+              - bucket_key_enabled = true -> null
+
+              - apply_server_side_encryption_by_default {
+                  - kms_master_key_id = "arn:aws:kms:ap-south-1:129373676098:key/e4d6829a-265b-40a3-902a-920eb17dd5ff" -> null
+                  - sse_algorithm     = "aws:kms" -> null
+                }
+            }
+        }
+
+      - versioning {
+          - enabled    = true -> null
+          - mfa_delete = false -> null
+        }
+    }
+
+  # module.data_lake.aws_s3_bucket.logs will be destroyed
+  - resource "aws_s3_bucket" "logs" {
+      - arn                         = "arn:aws:s3:::retail-data-lake-dev-676098-access-logs" -> null
+      - bucket                      = "retail-data-lake-dev-676098-access-logs" -> null
+      - bucket_domain_name          = "retail-data-lake-dev-676098-access-logs.s3.amazonaws.com" -> null
+      - bucket_regional_domain_name = "retail-data-lake-dev-676098-access-logs.s3.ap-south-1.amazonaws.com" -> null
+      - force_destroy               = true -> null
+      - hosted_zone_id              = "Z11RGJOFQNVJUP" -> null
+      - id                          = "retail-data-lake-dev-676098-access-logs" -> null
+      - object_lock_enabled         = false -> null
+      - region                      = "ap-south-1" -> null
+      - request_payer               = "BucketOwner" -> null
+      - tags                        = {
+          - "Environment" = "dev"
+          - "Module"      = "s3_data_lake"
+        } -> null
+      - tags_all                    = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Module"      = "s3_data_lake"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+        # (3 unchanged attributes hidden)
+
+      - grant {
+          - id          = "815851ad723a0856d297568cb65834c4b43cebc16ec1db8189de629639b7bbb8" -> null
+          - permissions = [
+              - "FULL_CONTROL",
+            ] -> null
+          - type        = "CanonicalUser" -> null
+            # (1 unchanged attribute hidden)
+        }
+
+      - lifecycle_rule {
+          - abort_incomplete_multipart_upload_days = 0 -> null
+          - enabled                                = true -> null
+          - id                                     = "expire-access-logs" -> null
+          - tags                                   = {} -> null
+            # (1 unchanged attribute hidden)
+
+          - expiration {
+              - days                         = 365 -> null
+              - expired_object_delete_marker = false -> null
+                # (1 unchanged attribute hidden)
+            }
+        }
+
+      - server_side_encryption_configuration {
+          - rule {
+              - bucket_key_enabled = false -> null
+
+              - apply_server_side_encryption_by_default {
+                  - sse_algorithm     = "AES256" -> null
+                    # (1 unchanged attribute hidden)
+                }
+            }
+        }
+
+      - versioning {
+          - enabled    = false -> null
+          - mfa_delete = false -> null
+        }
+    }
+
+  # module.data_lake.aws_s3_bucket_lifecycle_configuration.logs will be destroyed
+  - resource "aws_s3_bucket_lifecycle_configuration" "logs" {
+      - bucket                                 = "retail-data-lake-dev-676098-access-logs" -> null
+      - id                                     = "retail-data-lake-dev-676098-access-logs" -> null
+      - transition_default_minimum_object_size = "all_storage_classes_128K" -> null
+        # (1 unchanged attribute hidden)
+
+      - rule {
+          - id     = "expire-access-logs" -> null
+          - status = "Enabled" -> null
+            # (1 unchanged attribute hidden)
+
+          - expiration {
+              - days                         = 365 -> null
+              - expired_object_delete_marker = false -> null
+            }
+
+          - filter {
+                # (1 unchanged attribute hidden)
+            }
+        }
+    }
+
+  # module.data_lake.aws_s3_bucket_logging.lake will be destroyed
+  - resource "aws_s3_bucket_logging" "lake" {
+      - bucket                = "retail-data-lake-dev-676098" -> null
+      - id                    = "retail-data-lake-dev-676098" -> null
+      - target_bucket         = "retail-data-lake-dev-676098-access-logs" -> null
+      - target_prefix         = "s3-access/" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.data_lake.aws_s3_bucket_ownership_controls.lake will be destroyed
+  - resource "aws_s3_bucket_ownership_controls" "lake" {
+      - bucket = "retail-data-lake-dev-676098" -> null
+      - id     = "retail-data-lake-dev-676098" -> null
+
+      - rule {
+          - object_ownership = "BucketOwnerEnforced" -> null
+        }
+    }
+
+  # module.data_lake.aws_s3_bucket_policy.lake will be destroyed
+  - resource "aws_s3_bucket_policy" "lake" {
+      - bucket = "retail-data-lake-dev-676098" -> null
+      - id     = "retail-data-lake-dev-676098" -> null
+      - policy = jsonencode(
+            {
+              - Statement = [
+                  - {
+                      - Action    = "s3:*"
+                      - Condition = {
+                          - Bool = {
+                              - "aws:SecureTransport" = "false"
+                            }
+                        }
+                      - Effect    = "Deny"
+                      - Principal = "*"
+                      - Resource  = [
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/*",
+                          - "arn:aws:s3:::retail-data-lake-dev-676098",
+                        ]
+                      - Sid       = "DenyInsecureTransport"
+                    },
+                ]
+              - Version   = "2012-10-17"
+            }
+        ) -> null
+    }
+
+  # module.data_lake.aws_s3_bucket_public_access_block.lake will be destroyed
+  - resource "aws_s3_bucket_public_access_block" "lake" {
+      - block_public_acls       = true -> null
+      - block_public_policy     = true -> null
+      - bucket                  = "retail-data-lake-dev-676098" -> null
+      - id                      = "retail-data-lake-dev-676098" -> null
+      - ignore_public_acls      = true -> null
+      - restrict_public_buckets = true -> null
+    }
+
+  # module.data_lake.aws_s3_bucket_public_access_block.logs will be destroyed
+  - resource "aws_s3_bucket_public_access_block" "logs" {
+      - block_public_acls       = true -> null
+      - block_public_policy     = true -> null
+      - bucket                  = "retail-data-lake-dev-676098-access-logs" -> null
+      - id                      = "retail-data-lake-dev-676098-access-logs" -> null
+      - ignore_public_acls      = true -> null
+      - restrict_public_buckets = true -> null
+    }
+
+  # module.data_lake.aws_s3_bucket_server_side_encryption_configuration.lake will be destroyed
+  - resource "aws_s3_bucket_server_side_encryption_configuration" "lake" {
+      - bucket                = "retail-data-lake-dev-676098" -> null
+      - id                    = "retail-data-lake-dev-676098" -> null
+        # (1 unchanged attribute hidden)
+
+      - rule {
+          - bucket_key_enabled = true -> null
+
+          - apply_server_side_encryption_by_default {
+              - kms_master_key_id = "arn:aws:kms:ap-south-1:129373676098:key/e4d6829a-265b-40a3-902a-920eb17dd5ff" -> null
+              - sse_algorithm     = "aws:kms" -> null
+            }
+        }
+    }
+
+  # module.data_lake.aws_s3_bucket_server_side_encryption_configuration.logs will be destroyed
+  - resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
+      - bucket                = "retail-data-lake-dev-676098-access-logs" -> null
+      - id                    = "retail-data-lake-dev-676098-access-logs" -> null
+        # (1 unchanged attribute hidden)
+
+      - rule {
+          - bucket_key_enabled = false -> null
+
+          - apply_server_side_encryption_by_default {
+              - sse_algorithm     = "AES256" -> null
+                # (1 unchanged attribute hidden)
+            }
+        }
+    }
+
+  # module.data_lake.aws_s3_bucket_versioning.lake will be destroyed
+  - resource "aws_s3_bucket_versioning" "lake" {
+      - bucket                = "retail-data-lake-dev-676098" -> null
+      - id                    = "retail-data-lake-dev-676098" -> null
+        # (1 unchanged attribute hidden)
+
+      - versioning_configuration {
+          - status     = "Enabled" -> null
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # module.data_lake.aws_s3_object.layers["_state/"] will be destroyed
+  - resource "aws_s3_object" "layers" {
+      - arn                           = "arn:aws:s3:::retail-data-lake-dev-676098/_state/" -> null
+      - bucket                        = "retail-data-lake-dev-676098" -> null
+      - bucket_key_enabled            = false -> null
+      - content_type                  = "application/octet-stream" -> null
+      - etag                          = "d41d8cd98f00b204e9800998ecf8427e" -> null
+      - force_destroy                 = false -> null
+      - id                            = "_state/" -> null
+      - key                           = "_state/" -> null
+      - metadata                      = {} -> null
+      - server_side_encryption        = "AES256" -> null
+      - storage_class                 = "STANDARD" -> null
+      - tags                          = {} -> null
+      - tags_all                      = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+      - version_id                    = "null" -> null
+        # (14 unchanged attributes hidden)
+    }
+
+  # module.data_lake.aws_s3_object.layers["curated/"] will be destroyed
+  - resource "aws_s3_object" "layers" {
+      - arn                           = "arn:aws:s3:::retail-data-lake-dev-676098/curated/" -> null
+      - bucket                        = "retail-data-lake-dev-676098" -> null
+      - bucket_key_enabled            = false -> null
+      - content_type                  = "application/octet-stream" -> null
+      - etag                          = "d41d8cd98f00b204e9800998ecf8427e" -> null
+      - force_destroy                 = false -> null
+      - id                            = "curated/" -> null
+      - key                           = "curated/" -> null
+      - metadata                      = {} -> null
+      - server_side_encryption        = "AES256" -> null
+      - storage_class                 = "STANDARD" -> null
+      - tags                          = {} -> null
+      - tags_all                      = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+      - version_id                    = "vTjrm8WsQsBZ3jHbn.rNU5WYDCfPn9K5" -> null
+        # (14 unchanged attributes hidden)
+    }
+
+  # module.data_lake.aws_s3_object.layers["dlq/"] will be destroyed
+  - resource "aws_s3_object" "layers" {
+      - arn                           = "arn:aws:s3:::retail-data-lake-dev-676098/dlq/" -> null
+      - bucket                        = "retail-data-lake-dev-676098" -> null
+      - bucket_key_enabled            = false -> null
+      - content_type                  = "application/octet-stream" -> null
+      - etag                          = "d41d8cd98f00b204e9800998ecf8427e" -> null
+      - force_destroy                 = false -> null
+      - id                            = "dlq/" -> null
+      - key                           = "dlq/" -> null
+      - metadata                      = {} -> null
+      - server_side_encryption        = "AES256" -> null
+      - storage_class                 = "STANDARD" -> null
+      - tags                          = {} -> null
+      - tags_all                      = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+      - version_id                    = "CUEu_s9jnDd4gJDwEWfzGML0.WUnmh_j" -> null
+        # (14 unchanged attributes hidden)
+    }
+
+  # module.data_lake.aws_s3_object.layers["processed/"] will be destroyed
+  - resource "aws_s3_object" "layers" {
+      - arn                           = "arn:aws:s3:::retail-data-lake-dev-676098/processed/" -> null
+      - bucket                        = "retail-data-lake-dev-676098" -> null
+      - bucket_key_enabled            = false -> null
+      - content_type                  = "application/octet-stream" -> null
+      - etag                          = "d41d8cd98f00b204e9800998ecf8427e" -> null
+      - force_destroy                 = false -> null
+      - id                            = "processed/" -> null
+      - key                           = "processed/" -> null
+      - metadata                      = {} -> null
+      - server_side_encryption        = "AES256" -> null
+      - storage_class                 = "STANDARD" -> null
+      - tags                          = {} -> null
+      - tags_all                      = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+      - version_id                    = "Yz5Y_rOLjLQDFVYDW3kUBmtT1J.Hhw4r" -> null
+        # (14 unchanged attributes hidden)
+    }
+
+  # module.data_lake.aws_s3_object.layers["quarantine/"] will be destroyed
+  - resource "aws_s3_object" "layers" {
+      - arn                           = "arn:aws:s3:::retail-data-lake-dev-676098/quarantine/" -> null
+      - bucket                        = "retail-data-lake-dev-676098" -> null
+      - bucket_key_enabled            = false -> null
+      - content_type                  = "application/octet-stream" -> null
+      - etag                          = "d41d8cd98f00b204e9800998ecf8427e" -> null
+      - force_destroy                 = false -> null
+      - id                            = "quarantine/" -> null
+      - key                           = "quarantine/" -> null
+      - metadata                      = {} -> null
+      - server_side_encryption        = "AES256" -> null
+      - storage_class                 = "STANDARD" -> null
+      - tags                          = {} -> null
+      - tags_all                      = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+      - version_id                    = "ilCc2ku7.H_NYAYmYzcVyPrtTykrprCo" -> null
+        # (14 unchanged attributes hidden)
+    }
+
+  # module.data_lake.aws_s3_object.layers["raw/"] will be destroyed
+  - resource "aws_s3_object" "layers" {
+      - arn                           = "arn:aws:s3:::retail-data-lake-dev-676098/raw/" -> null
+      - bucket                        = "retail-data-lake-dev-676098" -> null
+      - bucket_key_enabled            = false -> null
+      - content_type                  = "application/octet-stream" -> null
+      - etag                          = "d41d8cd98f00b204e9800998ecf8427e" -> null
+      - force_destroy                 = false -> null
+      - id                            = "raw/" -> null
+      - key                           = "raw/" -> null
+      - metadata                      = {} -> null
+      - server_side_encryption        = "AES256" -> null
+      - storage_class                 = "STANDARD" -> null
+      - tags                          = {} -> null
+      - tags_all                      = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+      - version_id                    = "null" -> null
+        # (14 unchanged attributes hidden)
+    }
+
+  # module.data_lake.aws_s3_object.layers["scripts/"] will be destroyed
+  - resource "aws_s3_object" "layers" {
+      - arn                           = "arn:aws:s3:::retail-data-lake-dev-676098/scripts/" -> null
+      - bucket                        = "retail-data-lake-dev-676098" -> null
+      - bucket_key_enabled            = false -> null
+      - content_type                  = "application/octet-stream" -> null
+      - etag                          = "d41d8cd98f00b204e9800998ecf8427e" -> null
+      - force_destroy                 = false -> null
+      - id                            = "scripts/" -> null
+      - key                           = "scripts/" -> null
+      - metadata                      = {} -> null
+      - server_side_encryption        = "AES256" -> null
+      - storage_class                 = "STANDARD" -> null
+      - tags                          = {} -> null
+      - tags_all                      = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+      - version_id                    = "PtzI.ExRT57wqWvuJ_swijiRzXuzkoLX" -> null
+        # (14 unchanged attributes hidden)
+    }
+
+  # module.glue_role.aws_iam_role.glue will be destroyed
+  - resource "aws_iam_role" "glue" {
+      - arn                   = "arn:aws:iam::129373676098:role/retail-glue-etl-dev" -> null
+      - assume_role_policy    = jsonencode(
+            {
+              - Statement = [
+                  - {
+                      - Action    = "sts:AssumeRole"
+                      - Condition = {
+                          - StringEquals = {
+                              - "aws:SourceAccount" = "129373676098"
+                            }
+                        }
+                      - Effect    = "Allow"
+                      - Principal = {
+                          - Service = "glue.amazonaws.com"
+                        }
+                    },
+                ]
+              - Version   = "2012-10-17"
+            }
+        ) -> null
+      - create_date           = "2026-10-05T15:21:32Z" -> null
+      - force_detach_policies = false -> null
+      - id                    = "retail-glue-etl-dev" -> null
+      - managed_policy_arns   = [] -> null
+      - max_session_duration  = 3600 -> null
+      - name                  = "retail-glue-etl-dev" -> null
+      - path                  = "/" -> null
+      - tags                  = {} -> null
+      - tags_all              = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+      - unique_id             = "AROAR4H2FUJBIV6JJ5BR6" -> null
+        # (3 unchanged attributes hidden)
+
+      - inline_policy {
+          - name   = "least-privilege-etl" -> null
+          - policy = jsonencode(
+                {
+                  - Statement = [
+                      - {
+                          - Action    = [
+                              - "s3:ListBucket",
+                              - "s3:GetBucketLocation",
+                            ]
+                          - Condition = {
+                              - StringLike = {
+                                  - "s3:prefix" = [
+                                      - "raw/*",
+                                      - "scripts/*",
+                                      - "processed/*",
+                                      - "curated/*",
+                                      - "quarantine/*",
+                                      - "_state/*",
+                                      - "tmp/*",
+                                      - "",
+                                    ]
+                                }
+                            }
+                          - Effect    = "Allow"
+                          - Resource  = "arn:aws:s3:::retail-data-lake-dev-676098"
+                          - Sid       = "ListLakeBucketOnlyForOurPrefixes"
+                        },
+                      - {
+                          - Action   = [
+                              - "s3:GetObjectVersion",
+                              - "s3:GetObject",
+                            ]
+                          - Effect   = "Allow"
+                          - Resource = [
+                              - "arn:aws:s3:::retail-data-lake-dev-676098/tmp/*",
+                              - "arn:aws:s3:::retail-data-lake-dev-676098/scripts/*",
+                              - "arn:aws:s3:::retail-data-lake-dev-676098/raw/*",
+                              - "arn:aws:s3:::retail-data-lake-dev-676098/quarantine/*",
+                              - "arn:aws:s3:::retail-data-lake-dev-676098/processed/*",
+                              - "arn:aws:s3:::retail-data-lake-dev-676098/curated/*",
+                              - "arn:aws:s3:::retail-data-lake-dev-676098/_state/*",
+                            ]
+                          - Sid      = "ReadInputs"
+                        },
+                      - {
+                          - Action   = [
+                              - "s3:PutObject",
+                              - "s3:DeleteObject",
+                              - "s3:AbortMultipartUpload",
+                            ]
+                          - Effect   = "Allow"
+                          - Resource = [
+                              - "arn:aws:s3:::retail-data-lake-dev-676098/tmp/*",
+                              - "arn:aws:s3:::retail-data-lake-dev-676098/quarantine/*",
+                              - "arn:aws:s3:::retail-data-lake-dev-676098/processed/*",
+                              - "arn:aws:s3:::retail-data-lake-dev-676098/curated/*",
+                              - "arn:aws:s3:::retail-data-lake-dev-676098/_state/*",
+                            ]
+                          - Sid      = "WriteOutputs"
+                        },
+                      - {
+                          - Action   = [
+                              - "kms:GenerateDataKey",
+                              - "kms:Encrypt",
+                              - "kms:DescribeKey",
+                              - "kms:Decrypt",
+                            ]
+                          - Effect   = "Allow"
+                          - Resource = "arn:aws:kms:ap-south-1:129373676098:key/e4d6829a-265b-40a3-902a-920eb17dd5ff"
+                          - Sid      = "UseLakeKmsKeyOnly"
+                        },
+                      - {
+                          - Action   = [
+                              - "logs:PutLogEvents",
+                              - "logs:CreateLogStream",
+                              - "logs:CreateLogGroup",
+                              - "logs:AssociateKmsKey",
+                            ]
+                          - Effect   = "Allow"
+                          - Resource = [
+                              - "arn:aws:logs:ap-south-1:129373676098:log-group:/aws-glue/retail/dev/transactions-etl:*",
+                              - "arn:aws:logs:ap-south-1:129373676098:log-group:/aws-glue/*",
+                            ]
+                          - Sid      = "WriteOwnLogsOnly"
+                        },
+                      - {
+                          - Action    = "cloudwatch:PutMetricData"
+                          - Condition = {
+                              - StringEquals = {
+                                  - "cloudwatch:namespace" = [
+                                      - "Glue",
+                                      - "RetailDataPlatform",
+                                    ]
+                                }
+                            }
+                          - Effect    = "Allow"
+                          - Resource  = "*"
+                          - Sid       = "PublishMetricsToOwnNamespace"
+                        },
+                      - {
+                          - Action   = [
+                              - "glue:UpdateTable",
+                              - "glue:UpdatePartition",
+                              - "glue:GetTables",
+                              - "glue:GetTable",
+                              - "glue:GetPartitions",
+                              - "glue:GetPartition",
+                              - "glue:GetDatabase",
+                              - "glue:CreateTable",
+                              - "glue:BatchGetPartition",
+                              - "glue:BatchCreatePartition",
+                            ]
+                          - Effect   = "Allow"
+                          - Resource = [
+                              - "arn:aws:glue:ap-south-1:129373676098:table/retail_lake_dev/*",
+                              - "arn:aws:glue:ap-south-1:129373676098:database/retail_lake_dev",
+                              - "arn:aws:glue:ap-south-1:129373676098:catalog",
+                            ]
+                          - Sid      = "GlueCatalogForOwnDatabase"
+                        },
+                    ]
+                  - Version   = "2012-10-17"
+                }
+            ) -> null
+        }
+    }
+
+  # module.glue_role.aws_iam_role_policy.glue will be destroyed
+  - resource "aws_iam_role_policy" "glue" {
+      - id          = "retail-glue-etl-dev:least-privilege-etl" -> null
+      - name        = "least-privilege-etl" -> null
+      - policy      = jsonencode(
+            {
+              - Statement = [
+                  - {
+                      - Action    = [
+                          - "s3:ListBucket",
+                          - "s3:GetBucketLocation",
+                        ]
+                      - Condition = {
+                          - StringLike = {
+                              - "s3:prefix" = [
+                                  - "raw/*",
+                                  - "scripts/*",
+                                  - "processed/*",
+                                  - "curated/*",
+                                  - "quarantine/*",
+                                  - "_state/*",
+                                  - "tmp/*",
+                                  - "",
+                                ]
+                            }
+                        }
+                      - Effect    = "Allow"
+                      - Resource  = "arn:aws:s3:::retail-data-lake-dev-676098"
+                      - Sid       = "ListLakeBucketOnlyForOurPrefixes"
+                    },
+                  - {
+                      - Action   = [
+                          - "s3:GetObjectVersion",
+                          - "s3:GetObject",
+                        ]
+                      - Effect   = "Allow"
+                      - Resource = [
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/tmp/*",
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/scripts/*",
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/raw/*",
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/quarantine/*",
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/processed/*",
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/curated/*",
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/_state/*",
+                        ]
+                      - Sid      = "ReadInputs"
+                    },
+                  - {
+                      - Action   = [
+                          - "s3:PutObject",
+                          - "s3:DeleteObject",
+                          - "s3:AbortMultipartUpload",
+                        ]
+                      - Effect   = "Allow"
+                      - Resource = [
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/tmp/*",
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/quarantine/*",
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/processed/*",
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/curated/*",
+                          - "arn:aws:s3:::retail-data-lake-dev-676098/_state/*",
+                        ]
+                      - Sid      = "WriteOutputs"
+                    },
+                  - {
+                      - Action   = [
+                          - "kms:GenerateDataKey",
+                          - "kms:Encrypt",
+                          - "kms:DescribeKey",
+                          - "kms:Decrypt",
+                        ]
+                      - Effect   = "Allow"
+                      - Resource = "arn:aws:kms:ap-south-1:129373676098:key/e4d6829a-265b-40a3-902a-920eb17dd5ff"
+                      - Sid      = "UseLakeKmsKeyOnly"
+                    },
+                  - {
+                      - Action   = [
+                          - "logs:PutLogEvents",
+                          - "logs:CreateLogStream",
+                          - "logs:CreateLogGroup",
+                          - "logs:AssociateKmsKey",
+                        ]
+                      - Effect   = "Allow"
+                      - Resource = [
+                          - "arn:aws:logs:ap-south-1:129373676098:log-group:/aws-glue/retail/dev/transactions-etl:*",
+                          - "arn:aws:logs:ap-south-1:129373676098:log-group:/aws-glue/*",
+                        ]
+                      - Sid      = "WriteOwnLogsOnly"
+                    },
+                  - {
+                      - Action    = "cloudwatch:PutMetricData"
+                      - Condition = {
+                          - StringEquals = {
+                              - "cloudwatch:namespace" = [
+                                  - "Glue",
+                                  - "RetailDataPlatform",
+                                ]
+                            }
+                        }
+                      - Effect    = "Allow"
+                      - Resource  = "*"
+                      - Sid       = "PublishMetricsToOwnNamespace"
+                    },
+                  - {
+                      - Action   = [
+                          - "glue:UpdateTable",
+                          - "glue:UpdatePartition",
+                          - "glue:GetTables",
+                          - "glue:GetTable",
+                          - "glue:GetPartitions",
+                          - "glue:GetPartition",
+                          - "glue:GetDatabase",
+                          - "glue:CreateTable",
+                          - "glue:BatchGetPartition",
+                          - "glue:BatchCreatePartition",
+                        ]
+                      - Effect   = "Allow"
+                      - Resource = [
+                          - "arn:aws:glue:ap-south-1:129373676098:table/retail_lake_dev/*",
+                          - "arn:aws:glue:ap-south-1:129373676098:database/retail_lake_dev",
+                          - "arn:aws:glue:ap-south-1:129373676098:catalog",
+                        ]
+                      - Sid      = "GlueCatalogForOwnDatabase"
+                    },
+                ]
+              - Version   = "2012-10-17"
+            }
+        ) -> null
+      - role        = "retail-glue-etl-dev" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.monitoring.aws_cloudwatch_dashboard.this will be destroyed
+  - resource "aws_cloudwatch_dashboard" "this" {
+      - dashboard_arn  = "arn:aws:cloudwatch::129373676098:dashboard/retail-data-platform-dev" -> null
+      - dashboard_body = jsonencode(
+            {
+              - widgets = [
+                  - {
+                      - height     = 6
+                      - properties = {
+                          - metrics = [
+                              - [
+                                  - "RetailDataPlatform",
+                                  - "RowsValid",
+                                ],
+                              - [
+                                  - "RetailDataPlatform",
+                                  - "RowsQuarantined",
+                                ],
+                            ]
+                          - period  = 3600
+                          - region  = "ap-south-1"
+                          - stat    = "Sum"
+                          - title   = "Rows per ETL run (valid vs quarantined)"
+                        }
+                      - type       = "metric"
+                      - width      = 12
+                      - x          = 0
+                      - y          = 0
+                    },
+                  - {
+                      - height     = 6
+                      - properties = {
+                          - query  = "SOURCE '/aws-glue/retail/dev/transactions-etl' | filter event = 'DQ_METRICS' | fields @timestamp, rows_read, rows_valid, rows_quarantined, duplicates_removed, duration_sec | sort @timestamp desc | limit 20"
+                          - region = "ap-south-1"
+                          - title  = "Latest DQ metrics"
+                        }
+                      - type       = "log"
+                      - width      = 12
+                      - x          = 12
+                      - y          = 0
+                    },
+                ]
+            }
+        ) -> null
+      - dashboard_name = "retail-data-platform-dev" -> null
+      - id             = "retail-data-platform-dev" -> null
+    }
+
+  # module.monitoring.aws_cloudwatch_log_metric_filter.etl_failed will be destroyed
+  - resource "aws_cloudwatch_log_metric_filter" "etl_failed" {
+      - id             = "etl-run-failed" -> null
+      - log_group_name = "/aws-glue/retail/dev/transactions-etl" -> null
+      - name           = "etl-run-failed" -> null
+      - pattern        = "\"ETL run FAILED\"" -> null
+
+      - metric_transformation {
+          - dimensions    = {} -> null
+          - name          = "EtlRunFailed" -> null
+          - namespace     = "RetailDataPlatform" -> null
+          - unit          = "Count" -> null
+          - value         = "1" -> null
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # module.monitoring.aws_cloudwatch_log_metric_filter.rows_quarantined will be destroyed
+  - resource "aws_cloudwatch_log_metric_filter" "rows_quarantined" {
+      - id             = "dq-rows-quarantined" -> null
+      - log_group_name = "/aws-glue/retail/dev/transactions-etl" -> null
+      - name           = "dq-rows-quarantined" -> null
+      - pattern        = "{ $.event = \"DQ_METRICS\" }" -> null
+
+      - metric_transformation {
+          - dimensions    = {} -> null
+          - name          = "RowsQuarantined" -> null
+          - namespace     = "RetailDataPlatform" -> null
+          - unit          = "Count" -> null
+          - value         = "$.rows_quarantined" -> null
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # module.monitoring.aws_cloudwatch_log_metric_filter.rows_valid will be destroyed
+  - resource "aws_cloudwatch_log_metric_filter" "rows_valid" {
+      - id             = "dq-rows-valid" -> null
+      - log_group_name = "/aws-glue/retail/dev/transactions-etl" -> null
+      - name           = "dq-rows-valid" -> null
+      - pattern        = "{ $.event = \"DQ_METRICS\" }" -> null
+
+      - metric_transformation {
+          - dimensions    = {} -> null
+          - name          = "RowsValid" -> null
+          - namespace     = "RetailDataPlatform" -> null
+          - unit          = "Count" -> null
+          - value         = "$.rows_valid" -> null
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # module.monitoring.aws_cloudwatch_metric_alarm.dq_quarantine_high will be destroyed
+  - resource "aws_cloudwatch_metric_alarm" "dq_quarantine_high" {
+      - actions_enabled                       = true -> null
+      - alarm_actions                         = [
+          - "arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev",
+        ] -> null
+      - alarm_description                     = "More than 5000 rows failed data-quality rules in one run - check the source system." -> null
+      - alarm_name                            = "retail-dq-quarantine-high-dev" -> null
+      - arn                                   = "arn:aws:cloudwatch:ap-south-1:129373676098:alarm:retail-dq-quarantine-high-dev" -> null
+      - comparison_operator                   = "GreaterThanThreshold" -> null
+      - datapoints_to_alarm                   = 0 -> null
+      - dimensions                            = {} -> null
+      - evaluation_periods                    = 1 -> null
+      - id                                    = "retail-dq-quarantine-high-dev" -> null
+      - insufficient_data_actions             = [] -> null
+      - metric_name                           = "RowsQuarantined" -> null
+      - namespace                             = "RetailDataPlatform" -> null
+      - ok_actions                            = [] -> null
+      - period                                = 3600 -> null
+      - statistic                             = "Maximum" -> null
+      - tags                                  = {} -> null
+      - tags_all                              = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+      - threshold                             = 5000 -> null
+      - treat_missing_data                    = "notBreaching" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.monitoring.aws_cloudwatch_metric_alarm.etl_failed will be destroyed
+  - resource "aws_cloudwatch_metric_alarm" "etl_failed" {
+      - actions_enabled                       = true -> null
+      - alarm_actions                         = [
+          - "arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev",
+        ] -> null
+      - alarm_description                     = "The ETL logged a fatal error. Check the log group /aws-glue/retail/dev/transactions-etl." -> null
+      - alarm_name                            = "retail-etl-failed-dev" -> null
+      - arn                                   = "arn:aws:cloudwatch:ap-south-1:129373676098:alarm:retail-etl-failed-dev" -> null
+      - comparison_operator                   = "GreaterThanThreshold" -> null
+      - datapoints_to_alarm                   = 0 -> null
+      - dimensions                            = {} -> null
+      - evaluation_periods                    = 1 -> null
+      - id                                    = "retail-etl-failed-dev" -> null
+      - insufficient_data_actions             = [] -> null
+      - metric_name                           = "EtlRunFailed" -> null
+      - namespace                             = "RetailDataPlatform" -> null
+      - ok_actions                            = [] -> null
+      - period                                = 300 -> null
+      - statistic                             = "Sum" -> null
+      - tags                                  = {} -> null
+      - tags_all                              = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+      - threshold                             = 0 -> null
+      - treat_missing_data                    = "notBreaching" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.monitoring.aws_cloudwatch_metric_alarm.no_data_loaded will be destroyed
+  - resource "aws_cloudwatch_metric_alarm" "no_data_loaded" {
+      - actions_enabled                       = true -> null
+      - alarm_actions                         = [
+          - "arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev",
+        ] -> null
+      - alarm_description                     = "No ETL run reported valid rows in the last ~26h (job not scheduled, or upstream sent nothing)." -> null
+      - alarm_name                            = "retail-no-data-loaded-dev" -> null
+      - arn                                   = "arn:aws:cloudwatch:ap-south-1:129373676098:alarm:retail-no-data-loaded-dev" -> null
+      - comparison_operator                   = "LessThanThreshold" -> null
+      - datapoints_to_alarm                   = 26 -> null
+      - dimensions                            = {} -> null
+      - evaluation_periods                    = 26 -> null
+      - id                                    = "retail-no-data-loaded-dev" -> null
+      - insufficient_data_actions             = [] -> null
+      - metric_name                           = "RowsValid" -> null
+      - namespace                             = "RetailDataPlatform" -> null
+      - ok_actions                            = [] -> null
+      - period                                = 3600 -> null
+      - statistic                             = "Sum" -> null
+      - tags                                  = {} -> null
+      - tags_all                              = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+      - threshold                             = 1 -> null
+      - treat_missing_data                    = "breaching" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.monitoring.aws_sns_topic.alerts will be destroyed
+  - resource "aws_sns_topic" "alerts" {
+      - application_success_feedback_sample_rate = 0 -> null
+      - arn                                      = "arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev" -> null
+      - content_based_deduplication              = false -> null
+      - fifo_topic                               = false -> null
+      - firehose_success_feedback_sample_rate    = 0 -> null
+      - http_success_feedback_sample_rate        = 0 -> null
+      - id                                       = "arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev" -> null
+      - kms_master_key_id                        = "alias/aws/sns" -> null
+      - lambda_success_feedback_sample_rate      = 0 -> null
+      - name                                     = "retail-data-alerts-dev" -> null
+      - owner                                    = "129373676098" -> null
+      - policy                                   = jsonencode(
+            {
+              - Statement = [
+                  - {
+                      - Action    = "sns:Publish"
+                      - Effect    = "Allow"
+                      - Principal = {
+                          - Service = [
+                              - "events.amazonaws.com",
+                              - "cloudwatch.amazonaws.com",
+                            ]
+                        }
+                      - Resource  = "arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev"
+                      - Sid       = "AllowEventBridgeAndCloudWatch"
+                    },
+                ]
+              - Version   = "2012-10-17"
+            }
+        ) -> null
+      - signature_version                        = 0 -> null
+      - sqs_success_feedback_sample_rate         = 0 -> null
+      - tags                                     = {} -> null
+      - tags_all                                 = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+        # (17 unchanged attributes hidden)
+    }
+
+  # module.monitoring.aws_sns_topic_policy.alerts will be destroyed
+  - resource "aws_sns_topic_policy" "alerts" {
+      - arn    = "arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev" -> null
+      - id     = "arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev" -> null
+      - owner  = "129373676098" -> null
+      - policy = jsonencode(
+            {
+              - Statement = [
+                  - {
+                      - Action    = "sns:Publish"
+                      - Effect    = "Allow"
+                      - Principal = {
+                          - Service = [
+                              - "events.amazonaws.com",
+                              - "cloudwatch.amazonaws.com",
+                            ]
+                        }
+                      - Resource  = "arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev"
+                      - Sid       = "AllowEventBridgeAndCloudWatch"
+                    },
+                ]
+              - Version   = "2012-10-17"
+            }
+        ) -> null
+    }
+
+  # module.transactions_etl.aws_cloudwatch_log_group.job will be destroyed
+  - resource "aws_cloudwatch_log_group" "job" {
+      - arn               = "arn:aws:logs:ap-south-1:129373676098:log-group:/aws-glue/retail/dev/transactions-etl" -> null
+      - id                = "/aws-glue/retail/dev/transactions-etl" -> null
+      - log_group_class   = "STANDARD" -> null
+      - name              = "/aws-glue/retail/dev/transactions-etl" -> null
+      - retention_in_days = 7 -> null
+      - skip_destroy      = false -> null
+      - tags              = {} -> null
+      - tags_all          = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+        # (2 unchanged attributes hidden)
+    }
+
+  # module.transactions_etl.aws_s3_object.script will be destroyed
+  - resource "aws_s3_object" "script" {
+      - arn                           = "arn:aws:s3:::retail-data-lake-dev-676098/scripts/transactions-etl/5be3a4cecda77038615189a80268aa3e/transactions_etl.py" -> null
+      - bucket                        = "retail-data-lake-dev-676098" -> null
+      - bucket_key_enabled            = false -> null
+      - content_type                  = "application/octet-stream" -> null
+      - etag                          = "5be3a4cecda77038615189a80268aa3e" -> null
+      - force_destroy                 = false -> null
+      - id                            = "scripts/transactions-etl/5be3a4cecda77038615189a80268aa3e/transactions_etl.py" -> null
+      - key                           = "scripts/transactions-etl/5be3a4cecda77038615189a80268aa3e/transactions_etl.py" -> null
+      - metadata                      = {} -> null
+      - server_side_encryption        = "AES256" -> null
+      - source                        = "./../../pyspark/transactions_etl.py" -> null
+      - storage_class                 = "STANDARD" -> null
+      - tags                          = {} -> null
+      - tags_all                      = {
+          - "DataClass"   = "confidential"
+          - "Environment" = "dev"
+          - "ManagedBy"   = "terraform"
+          - "Owner"       = "data-engineering"
+          - "Project"     = "retail"
+        } -> null
+      - version_id                    = "iZWkjsKgolGLdZhWuUAuxom0dJ1VuXUO" -> null
+        # (13 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 0 to change, 33 to destroy.
+
+Changes to Outputs:
+  - alerts_topic_arn = "arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev" -> null
+  - data_lake_bucket = "retail-data-lake-dev-676098" -> null
+  - data_lake_layers = {
+      - curated    = "s3://retail-data-lake-dev-676098/curated"
+      - processed  = "s3://retail-data-lake-dev-676098/processed"
+      - quarantine = "s3://retail-data-lake-dev-676098/quarantine"
+      - raw        = "s3://retail-data-lake-dev-676098/raw"
+      - scripts    = "s3://retail-data-lake-dev-676098/scripts"
+      - state      = "s3://retail-data-lake-dev-676098/_state"
+    } -> null
+  - glue_job_name    = "retail-transactions-etl-dev" -> null
+  - glue_role_arn    = "arn:aws:iam::129373676098:role/retail-glue-etl-dev" -> null
+
+Do you really want to destroy all resources?
+  Terraform will destroy all your managed infrastructure, as shown above.
+  There is no undo. Only 'yes' will be accepted to confirm.
+
+  Enter a value: yes
+
+module.data_lake.aws_s3_bucket_logging.lake: Destroying... [id=retail-data-lake-dev-676098]
+module.data_lake.aws_s3_bucket_ownership_controls.lake: Destroying... [id=retail-data-lake-dev-676098]
+module.monitoring.aws_cloudwatch_metric_alarm.no_data_loaded: Destroying... [id=retail-no-data-loaded-dev]
+module.monitoring.aws_cloudwatch_log_metric_filter.etl_failed: Destroying... [id=etl-run-failed]
+module.monitoring.aws_cloudwatch_log_metric_filter.rows_quarantined: Destroying... [id=dq-rows-quarantined]
+module.monitoring.aws_cloudwatch_metric_alarm.etl_failed: Destroying... [id=retail-etl-failed-dev]
+module.glue_role.aws_iam_role_policy.glue: Destroying... [id=retail-glue-etl-dev:least-privilege-etl]
+module.data_lake.aws_s3_object.layers["raw/"]: Destroying... [id=raw/]
+module.transactions_etl.aws_s3_object.script: Destroying... [id=scripts/transactions-etl/5be3a4cecda77038615189a80268aa3e/transactions_etl.py]
+module.data_lake.aws_s3_object.layers["processed/"]: Destroying... [id=processed/]
+module.monitoring.aws_cloudwatch_log_metric_filter.rows_quarantined: Destruction complete after 0s
+module.data_lake.aws_s3_object.layers["scripts/"]: Destroying... [id=scripts/]
+module.monitoring.aws_cloudwatch_metric_alarm.no_data_loaded: Destruction complete after 0s
+module.transactions_etl.aws_s3_object.script: Destruction complete after 0s
+module.monitoring.aws_cloudwatch_log_metric_filter.rows_valid: Destroying... [id=dq-rows-valid]
+module.data_lake.aws_s3_object.layers["quarantine/"]: Destroying... [id=quarantine/]
+module.monitoring.aws_cloudwatch_metric_alarm.etl_failed: Destruction complete after 0s
+module.data_lake.aws_s3_object.layers["dlq/"]: Destroying... [id=dlq/]
+module.monitoring.aws_cloudwatch_log_metric_filter.etl_failed: Destruction complete after 0s
+module.data_lake.aws_s3_object.layers["processed/"]: Destruction complete after 0s
+module.data_lake.aws_s3_bucket_versioning.lake: Destroying... [id=retail-data-lake-dev-676098]
+module.data_lake.aws_s3_object.layers["curated/"]: Destroying... [id=curated/]
+module.data_lake.aws_s3_object.layers["raw/"]: Destruction complete after 0s
+module.data_lake.aws_s3_bucket_lifecycle_configuration.logs: Destroying... [id=retail-data-lake-dev-676098-access-logs]
+module.monitoring.aws_cloudwatch_log_metric_filter.rows_valid: Destruction complete after 0s
+module.data_lake.aws_s3_bucket_server_side_encryption_configuration.logs: Destroying... [id=retail-data-lake-dev-676098-access-logs]
+module.data_lake.aws_s3_object.layers["scripts/"]: Destruction complete after 0s
+module.monitoring.aws_sns_topic_policy.alerts: Destroying... [id=arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev]
+module.data_lake.aws_s3_object.layers["quarantine/"]: Destruction complete after 0s
+module.data_lake.aws_s3_bucket_server_side_encryption_configuration.lake: Destroying... [id=retail-data-lake-dev-676098]
+module.data_lake.aws_s3_object.layers["curated/"]: Destruction complete after 0s
+module.monitoring.aws_cloudwatch_metric_alarm.dq_quarantine_high: Destroying... [id=retail-dq-quarantine-high-dev]
+module.data_lake.aws_s3_object.layers["dlq/"]: Destruction complete after 0s
+module.data_lake.aws_s3_bucket_public_access_block.logs: Destroying... [id=retail-data-lake-dev-676098-access-logs]
+module.data_lake.aws_s3_bucket_logging.lake: Destruction complete after 0s
+module.monitoring.aws_cloudwatch_dashboard.this: Destroying... [id=retail-data-platform-dev]
+module.monitoring.aws_cloudwatch_metric_alarm.dq_quarantine_high: Destruction complete after 0s
+module.monitoring.aws_sns_topic_policy.alerts: Destruction complete after 0s
+module.data_lake.aws_kms_alias.lake: Destroying... [id=alias/retail-data-lake-dev]
+module.data_lake.aws_s3_bucket_policy.lake: Destroying... [id=retail-data-lake-dev-676098]
+module.data_lake.aws_kms_alias.lake: Destruction complete after 0s
+module.data_lake.aws_s3_object.layers["_state/"]: Destroying... [id=_state/]
+module.data_lake.aws_s3_bucket_versioning.lake: Destruction complete after 0s
+module.monitoring.aws_sns_topic.alerts: Destroying... [id=arn:aws:sns:ap-south-1:129373676098:retail-data-alerts-dev]
+module.data_lake.aws_s3_bucket_server_side_encryption_configuration.logs: Destruction complete after 0s
+module.data_lake.aws_s3_bucket_server_side_encryption_configuration.lake: Destruction complete after 0s
+module.data_lake.aws_s3_object.layers["_state/"]: Destruction complete after 0s
+module.monitoring.aws_sns_topic.alerts: Destruction complete after 0s
+module.data_lake.aws_s3_bucket_public_access_block.logs: Destruction complete after 1s
+module.data_lake.aws_s3_bucket_policy.lake: Destruction complete after 1s
+module.data_lake.aws_s3_bucket_public_access_block.lake: Destroying... [id=retail-data-lake-dev-676098]
+module.glue_role.aws_iam_role_policy.glue: Destruction complete after 1s
+module.data_lake.aws_kms_key.lake: Destroying... [id=e4d6829a-265b-40a3-902a-920eb17dd5ff]
+module.glue_role.aws_iam_role.glue: Destroying... [id=retail-glue-etl-dev]
+module.data_lake.aws_kms_key.lake: Destruction complete after 0s
+module.data_lake.aws_s3_bucket_public_access_block.lake: Destruction complete after 0s
+module.data_lake.aws_s3_bucket_lifecycle_configuration.logs: Destruction complete after 1s
+module.data_lake.aws_s3_bucket.logs: Destroying... [id=retail-data-lake-dev-676098-access-logs]
+module.data_lake.aws_s3_bucket_ownership_controls.lake: Destruction complete after 1s
+module.data_lake.aws_s3_bucket.lake: Destroying... [id=retail-data-lake-dev-676098]
+module.monitoring.aws_cloudwatch_dashboard.this: Destruction complete after 2s
+module.transactions_etl.aws_cloudwatch_log_group.job: Destroying... [id=/aws-glue/retail/dev/transactions-etl]
+module.data_lake.aws_s3_bucket.logs: Destruction complete after 1s
+module.transactions_etl.aws_cloudwatch_log_group.job: Destruction complete after 0s
+module.data_lake.aws_s3_bucket.lake: Destruction complete after 1s
+module.glue_role.aws_iam_role.glue: Destruction complete after 1s
+
+Destroy complete! Resources: 33 destroyed.
