@@ -79,7 +79,8 @@ Small files (thousands of 50 KB files) slow Spark and Athena because each file c
 4. Ingestion: Firehose buffering (e.g. 128 MB or 300 s) before writing to S3.
 5. Monitor: S3 Storage Lens / an Athena query on "$path" to count files per partition.
    
-Screenshot Pending to upload: the S3 console showing the bucket's layer folders, and one year=/month=/day= partition.
+> <img width="1114" height="604" alt="image" src="https://github.com/user-attachments/assets/558f77ae-f4cd-4f6f-850b-be639dc357bd" />
+
 
 
 # 3. ETL and Pyspark Implementation
