@@ -1,7 +1,7 @@
 
 # 1. Architecture
 
->
+> https://github.com/Harika130822/ADIHR_ASSIGNMENT/blob/main/Assignment1/Architecture%20(1).drawio
 
 Role of each layer
 Layer
